@@ -4,7 +4,8 @@
         android:width="450dp"
         android:height="450dp"
         android:viewportWidth="64"
-        android:viewportHeight="64">
+        android:viewportHeight="64" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://schemas.android.com/aapt ">
     <path
             android:pathData="M56.25,18V46L32,60 7.75,46V18L32,4Z"
             android:fillColor="#6075f2"/>
