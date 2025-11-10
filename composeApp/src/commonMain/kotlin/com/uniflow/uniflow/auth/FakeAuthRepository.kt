@@ -5,12 +5,10 @@ import kotlin.random.Random
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
-expect fun getCurrentTimeMillis(): Long
-
 class FakeAuthRepository : FakeAuthApi {
 
     private val fakeUsers = mutableListOf(
-        User(id = "1", email = "test@uniflow.com", password = "password123")
+        User(id = "1", email = "134288@student.ujs.sk", password = "demo123")
     )
 
     private val activeTokens = mutableMapOf<String, Long>()

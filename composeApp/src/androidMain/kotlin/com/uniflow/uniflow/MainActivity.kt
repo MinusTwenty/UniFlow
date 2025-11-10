@@ -12,10 +12,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface {
-                    LoginScreenWithValidation {
-                        // Here you handle successful login
-                        println("Login successful!") // Later navigate to home screen
-                    }
+                    LoginScreenWithValidation()
                 }
             }
         }

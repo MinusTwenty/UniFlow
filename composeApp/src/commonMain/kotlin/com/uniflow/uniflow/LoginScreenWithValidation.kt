@@ -2,17 +2,26 @@ package com.uniflow.uniflow
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.uniflow.uniflow.auth.FakeAuthRepository
+import com.uniflow.uniflow.auth.LoginRequest
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreenWithValidation(onLoginSuccess: () -> Unit = {}) {
+fun LoginScreenWithValidation() {
+    val repository = remember { FakeAuthRepository() }
+    val scope = rememberCoroutineScope()
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf<String?>(null) }
+    var rememberMe by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -21,14 +30,14 @@ fun LoginScreenWithValidation(onLoginSuccess: () -> Unit = {}) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Bejelentkezés", style = MaterialTheme.typography.headlineMedium)
+        Text("UniFlow", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(Modifier.height(24.dp))
 
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("AIS azonosító") },
+            label = { Text("Ais azonosító") },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -42,27 +51,51 @@ fun LoginScreenWithValidation(onLoginSuccess: () -> Unit = {}) {
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(8.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(checked = rememberMe, onCheckedChange = { rememberMe = it })
+            Text("Emlékezz rám")
+        }
+
+        Spacer(Modifier.height(16.dp))
 
         Button(
             onClick = {
-                when {
-                    email.isBlank() || password.isBlank() -> error = "Please fill in all fields"
-                    !email.contains("@") -> error = "Invalid email format"
-                    else -> {
-                        error = null
-                        onLoginSuccess()
+                isLoading = true
+                message = ""
+                scope.launch {
+                    try {
+                        repository.login(
+                            LoginRequest(email = email, password = password, rememberMe = rememberMe)
+                        )
+                        message = "Sikeres belépés"
+                    } catch (e: Exception) {
+                        message = "Sikertelen belépés"
+                    } finally {
+                        isLoading = false
                     }
                 }
             },
+            enabled = !isLoading,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Belépés")
+            Text(if (isLoading) "Bejelentkezés..." else "Belépés")
         }
 
-        error?.let {
-            Spacer(Modifier.height(16.dp))
-            Text(it, color = MaterialTheme.colorScheme.error)
+        Spacer(Modifier.height(16.dp))
+
+        if (message.isNotEmpty()) {
+            val msgColor =
+                if (message == "Sikeres belépés") MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.error
+
+            Text(
+                text = message,
+                color = msgColor
+            )
         }
     }
 }
