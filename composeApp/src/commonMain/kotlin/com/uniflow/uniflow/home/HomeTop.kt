@@ -1,23 +1,19 @@
 package com.uniflow.uniflow.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kotlinx.datetime.LocalDate
 
-// Top header composable (no Zimbra button, no Events button)
 @Composable
 fun HomeTop(
     student: StudentInfo,
@@ -27,9 +23,26 @@ fun HomeTop(
     nextRoom: String,
     nextTeacher: String,
     upcoming: List<LessonCard>,
-    nowTime: String // "HH:mm"
+    nowTime: String // kept for signature compatibility, not used
 ) {
-    val nowMinutes = parseTimeToMinutes(nowTime) ?: 0
+    // --- Week calculations ---
+    val today = WeekUtil.today()
+    val iso = WeekUtil.isoWeekInfo(today)
+    val parity = WeekUtil.isoWeekParity(today)
+    val acad = WeekUtil.academicWeek(
+        date = today,
+        semesterStart = LocalDate(2025, 9, 15),
+        semesterEnd   = LocalDate(2025, 12, 13)
+    )
+
+    // --- Realtime "now" in seconds; updates every second ---
+    var nowSec by remember { mutableStateOf(currentSecondsSinceMidnight()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            nowSec = currentSecondsSinceMidnight()
+            delay(1000)
+        }
+    }
 
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -41,7 +54,10 @@ fun HomeTop(
             // Section: Student info
             SectionCard(title = "Hallgató") {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -59,8 +75,19 @@ fun HomeTop(
                     Spacer(Modifier.weight(1f))
                     LangChip("HU")
                 }
-                Spacer(Modifier.height(8.dp))
-                InfoChip(student.weekType)
+
+                // Week chips in a single row
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    InfoChip("ISO hét: ${iso.week}")
+                    InfoChip(if (parity == WeekUtil.WeekParity.Even) "Páros hét" else "Páratlan hét")
+                    acad?.let { InfoChip("Akadémiai hét: $it") }
+                }
             }
 
             Spacer(Modifier.height(12.dp))
@@ -82,16 +109,19 @@ fun HomeTop(
 
             Spacer(Modifier.height(12.dp))
 
-            // Section: Szünet (only when currently between lessons)
-            findCurrentBreak(nowMinutes, upcoming)?.let { br ->
-                SectionCard(title = "Szünet") {
-                    Text(
-                        text = "Hátralévő: ${br.remainingMinutes} perc (köv. óra: ${br.nextLessonCode} ${minutesToHHmm(br.nextStartMinutes)})",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+            // Section: Szünet – appears before first lesson and between lessons, counts down
+            run {
+                val remaining = findBreakRemainingSeconds(nowSec, upcoming)
+                if (remaining != null && remaining > 0) {
+                    SectionCard(title = "Szünet") {
+                        Text(
+                            text = "A következő óráig: ${formatHuDurationDynamic(remaining)}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
                 }
-                Spacer(Modifier.height(12.dp))
             }
 
             // Section: Lessons
@@ -100,11 +130,11 @@ fun HomeTop(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    val statuses = upcoming.map { it to statusFor(it, nowMinutes) }
+                    val statuses = upcoming.map { it to statusFor(it, nowSec) }
                     val activeIndex = statuses.indexOfFirst { it.second == LessonStatus.ACTIVE }
                     val nextIndex = statuses.indexOfFirst { it.second == LessonStatus.UPCOMING }
                     val breakMinutes =
-                        if (activeIndex >= 0 && nextIndex >= 0 && nextIndex == activeIndex + 1)
+                        if (activeIndex >= 0 && nextIndex == activeIndex + 1)
                             breakBetween(upcoming[activeIndex], upcoming[nextIndex])
                         else null
 
@@ -121,138 +151,5 @@ fun HomeTop(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun LessonCardView(lesson: LessonCard, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier.heightIn(min = 72.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(Modifier.padding(10.dp)) {
-            Text(lesson.code, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(4.dp))
-            Text(lesson.time, style = MaterialTheme.typography.bodySmall)
-            Text(lesson.room, style = MaterialTheme.typography.bodySmall)
-            Text(lesson.teacher, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        }
-    }
-}
-
-@Composable
-fun SectionCard(
-    title: String,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(Modifier.padding(12.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(8.dp))
-            content()
-        }
-    }
-}
-
-@Composable
-fun LessonCardView(
-    lesson: LessonCard,
-    status: LessonStatus,
-    breakToNextMinutes: Int?,
-    modifier: Modifier = Modifier
-) {
-    val stripeColor = when (status) {
-        LessonStatus.ACTIVE -> MaterialTheme.colorScheme.primary
-        LessonStatus.UPCOMING -> MaterialTheme.colorScheme.secondary
-        LessonStatus.PAST -> MaterialTheme.colorScheme.outlineVariant
-    }
-
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min)
-        ) {
-            // Left color stripe for status
-            Box(
-                Modifier
-                    .width(4.dp)
-                    .fillMaxHeight()
-                    .background(stripeColor)
-            )
-
-            // Lesson details
-            Column(
-                Modifier
-                    .padding(10.dp)
-                    .weight(1f)
-            ) {
-                Text(
-                    lesson.code,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(Modifier.height(4.dp))
-                Text(lesson.time, style = MaterialTheme.typography.bodySmall)
-                Text(lesson.room, style = MaterialTheme.typography.bodySmall)
-                Text(
-                    lesson.teacher,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                if (status == LessonStatus.ACTIVE && breakToNextMinutes != null) {
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        "Szünet a következőig: ${breakToNextMinutes} perc",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatusPill(status: LessonStatus, breakToNextMinutes: Int?) {
-    val label = when (status) {
-        LessonStatus.ACTIVE -> "Aktív"
-        LessonStatus.UPCOMING -> {
-            if (breakToNextMinutes != null) "Következő • szünet ${breakToNextMinutes}p"
-            else "Következő"
-        }
-        LessonStatus.PAST -> "Lezajlott"
-    }
-    Surface(
-        color = MaterialTheme.colorScheme.inversePrimary,
-        shape = MaterialTheme.shapes.small
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-        )
     }
 }

@@ -1,65 +1,99 @@
 package com.uniflow.uniflow.home
 
-// "12:15" -> minutes since midnight
-fun parseTimeToMinutes(t: String): Int? {
-    val p = t.trim().split(":")
-    if (p.size != 2) return null
-    val h = p[0].toIntOrNull() ?: return null
-    val m = p[1].toIntOrNull() ?: return null
-    return h * 60 + m
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
+import kotlin.time.Clock
+
+
+/**
+ * Pure, static helpers for lesson time handling.
+ * Uses kotlinx-datetime (KMP-safe).
+ */
+
+// Accept EN DASH or simple hyphen between times
+private val RANGE_SPLIT = Regex("[–-]")
+
+// "HH:mm" or "HH:mm:ss" -> seconds since midnight
+fun parseTimeToSeconds(t: String): Int? {
+    val parts = t.trim().split(":")
+    if (parts.size !in 2..3) return null
+    val h = parts[0].toIntOrNull() ?: return null
+    val m = parts[1].toIntOrNull() ?: return null
+    val s = if (parts.size == 3) parts[2].toIntOrNull() ?: return null else 0
+    if (h !in 0..23 || m !in 0..59 || s !in 0..59) return null
+    return h * 3600 + m * 60 + s
 }
 
-// "12:15–13:00" -> Pair(start,end) in minutes
-fun parseRangeToMinutes(range: String): Pair<Int, Int>? {
-    val parts = range.split("–") // en dash
+// "HH:mm–HH:mm" or "HH:mm:ss–HH:mm:ss" -> (start,end) seconds
+fun parseRangeToSeconds(range: String): Pair<Int, Int>? {
+    val parts = range.split(RANGE_SPLIT)
     if (parts.size != 2) return null
-    val s = parseTimeToMinutes(parts[0]) ?: return null
-    val e = parseTimeToMinutes(parts[1]) ?: return null
+    val s = parseTimeToSeconds(parts[0]) ?: return null
+    val e = parseTimeToSeconds(parts[1]) ?: return null
     return s to e
 }
 
-fun statusFor(lesson: LessonCard, nowMinutes: Int): LessonStatus {
-    val (s, e) = parseRangeToMinutes(lesson.time) ?: return LessonStatus.PAST
+fun statusFor(lesson: LessonCard, nowSeconds: Int): LessonStatus {
+    val (s, e) = parseRangeToSeconds(lesson.time) ?: return LessonStatus.PAST
     return when {
-        nowMinutes in s until e -> LessonStatus.ACTIVE
-        nowMinutes < s -> LessonStatus.UPCOMING
+        nowSeconds in s until e -> LessonStatus.ACTIVE
+        nowSeconds < s -> LessonStatus.UPCOMING
         else -> LessonStatus.PAST
     }
 }
 
-// Break minutes between two lessons (end of a -> start of b); negative -> 0
+// Kept for callers that use minutes
 fun breakBetween(a: LessonCard, b: LessonCard): Int? {
-    val aRange = parseRangeToMinutes(a.time) ?: return null
-    val bRange = parseRangeToMinutes(b.time) ?: return null
-    return (bRange.first - aRange.second).coerceAtLeast(0)
+    val aRange = parseRangeToSeconds(a.time) ?: return null
+    val bRange = parseRangeToSeconds(b.time) ?: return null
+    return ((bRange.first - aRange.second) / 60).coerceAtLeast(0)
 }
 
 /**
- * If now is BETWEEN lessons[i] (ended) and lessons[i+1] (not yet started),
- * return remaining minutes until the next lesson starts.
+ * Returns remaining seconds until the next lesson starts when:
+ *  - now is BEFORE the first lesson of the day, or
+ *  - now is BETWEEN any two lessons (after one ended, before the next starts).
+ * Otherwise returns null (during lesson or after the last one).
  */
-fun findCurrentBreak(nowMinutes: Int, lessons: List<LessonCard>): BreakInfo? {
-    if (lessons.size < 2) return null
-    val items = lessons.mapNotNull { l ->
-        parseRangeToMinutes(l.time)?.let { range -> Triple(l, range.first, range.second) } // (lesson, start, end)
+fun findBreakRemainingSeconds(nowSeconds: Int, lessons: List<LessonCard>): Int? {
+    if (lessons.isEmpty()) return null
+    val ranges = lessons.mapNotNull { l ->
+        parseRangeToSeconds(l.time)?.let { (start, end) -> start to end }
     }
-    for (i in 0 until items.size - 1) {
-        val prevEnd = items[i].third
-        val nextStart = items[i + 1].second
-        if (nowMinutes in (prevEnd + 1) until nextStart) {
-            val remaining = (nextStart - nowMinutes).coerceAtLeast(0)
-            return BreakInfo(
-                nextLessonCode = items[i + 1].first.code,
-                nextStartMinutes = nextStart,
-                remainingMinutes = remaining
-            )
+    if (ranges.isEmpty()) return null
+
+    // Before first lesson
+    val firstStart = ranges.first().first
+    if (nowSeconds < firstStart) {
+        return (firstStart - nowSeconds).coerceAtLeast(0)
+    }
+
+    // Between lessons
+    for (i in 0 until ranges.lastIndex) {
+        val endPrev = ranges[i].second
+        val startNext = ranges[i + 1].first
+        if (nowSeconds in endPrev until startNext) {
+            return (startNext - nowSeconds).coerceAtLeast(0)
         }
     }
+
+    // During a lesson or after last lesson
     return null
 }
 
-fun minutesToHHmm(mins: Int): String {
-    val h = (mins / 60).toString().padStart(2, '0')
-    val m = (mins % 60).toString().padStart(2, '0')
-    return "$h:$m"
+/** Current local time since midnight in seconds (KMP-safe with kotlinx-datetime). */
+@OptIn(ExperimentalTime::class)
+    fun currentSecondsSinceMidnight(): Int {
+        val t = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time
+        println(t)
+        return t.hour * 3600 + t.minute * 60 + t.second }
+
+/** Format: if >= 1 hour -> "x ó y p", else -> "x p y mp" */
+fun formatHuDurationDynamic(seconds: Int): String {
+    val h = seconds / 3600
+    val m = (seconds % 3600) / 60
+    val s = seconds % 60
+    return if (h >= 1) "${h} ó ${m} p" else "${m} p ${s} mp"
 }
