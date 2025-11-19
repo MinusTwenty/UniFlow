@@ -1,49 +1,50 @@
 package com.uniflow.uniflow
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
-
-import uniflow.composeapp.generated.resources.Res
-import uniflow.composeapp.generated.resources.compose_multiplatform
+import com.uniflow.uniflow.home.HomeTop
+import com.uniflow.uniflow.home.LessonCard
+import com.uniflow.uniflow.home.StudentInfo
 
 @Composable
-@Preview
 fun App() {
+    var isLoggedIn by remember { mutableStateOf(false) }
+
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .safeContentPadding()
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
-                }
+        Surface(modifier = Modifier.fillMaxSize()) {
+            if (!isLoggedIn) {
+                // LOGIN SCREEN
+                LoginScreenWithValidation(
+                    onLoginSuccess = { isLoggedIn = true }
+                )
+            } else {
+                // MAIN SCREEN (HOME)
+                HomeTop(
+                    student = StudentInfo(
+                        uniShort = "UJS",
+                        fullName = "Pástó Vilmos Márk",
+                        weekType = "" // parity is calculated inside HomeTop
+                    ),
+                    location = "Tornaterem",
+                    building = "B épület",
+                    dateText = "2025.09.30.",
+                    nextRoom = "G312",
+                    nextTeacher = "XY",
+                    upcoming = demoLessons(),
+                    nowTime = ""
+                )
             }
         }
     }
 }
+
+// TEMP: demo lessons until API/import
+private fun demoLessons(): List<LessonCard> = listOf(
+    LessonCard(code = "TOR", time = "12:15-13:00", room = "B-02", teacher = "Tanár: XY"),
+    LessonCard(code = "PS1", time = "13:00-13:45", room = "B-03", teacher = "Tanár: XY"),
+    LessonCard(code = "OS1", time = "14:15-15:00", room = "C-12", teacher = "Tanár: XY"),
+    LessonCard(code = "OSM", time = "15:00-15:55", room = "C-13", teacher = "Tanár: XY")
+)

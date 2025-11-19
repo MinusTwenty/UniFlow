@@ -13,7 +13,9 @@ import com.uniflow.uniflow.auth.LoginRequest
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreenWithValidation() {
+fun LoginScreenWithValidation(
+    onLoginSuccess: () -> Unit
+) {
     val repository = remember { FakeAuthRepository() }
     val scope = rememberCoroutineScope()
 
@@ -72,6 +74,8 @@ fun LoginScreenWithValidation() {
                             LoginRequest(email = email, password = password, rememberMe = rememberMe)
                         )
                         message = "Sikeres belépés"
+
+                        onLoginSuccess()
                     } catch (e: Exception) {
                         message = "Sikertelen belépés"
                     } finally {
@@ -86,6 +90,13 @@ fun LoginScreenWithValidation() {
         }
 
         Spacer(Modifier.height(16.dp))
+
+        TextButton(
+            onClick = { onLoginSuccess() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Átugrás (teszt)")
+        }
 
         if (message.isNotEmpty()) {
             val msgColor =
