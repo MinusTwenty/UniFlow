@@ -100,7 +100,7 @@ fun LoginScreenWithValidation(
 
         if (message.isNotEmpty()) {
             val msgColor =
-                if (message == "Sikeresen belépés") MaterialTheme.colorScheme.primary
+                if (message == "Sikeres belépés") MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.error
 
             Text(
