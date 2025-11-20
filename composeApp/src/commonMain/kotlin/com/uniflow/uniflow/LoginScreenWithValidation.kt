@@ -95,7 +95,7 @@ fun LoginScreenWithValidation(
             onClick = { onLoginSuccess() },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Átugrás (teszt)")
+            Text("Átugrás (beta)")
         }
 
         if (message.isNotEmpty()) {
