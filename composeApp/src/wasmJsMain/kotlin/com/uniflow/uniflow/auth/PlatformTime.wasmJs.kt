@@ -1,5 +1,3 @@
 package com.uniflow.uniflow.auth
 
-import kotlinx.datetime.Clock
-
-actual fun getCurrentTimeMillis(): Long = Clock.System.now().toEpochMilliseconds()
+actual fun getCurrentTimeMillis(): Long = js("Date.now()") as Long

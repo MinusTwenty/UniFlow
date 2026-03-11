@@ -1,0 +1,15 @@
+CREATE TABLE lesson_occurrences (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  date TEXT NOT NULL, -- YYYY-MM-DD
+  UNIQUE(lesson_id, date)
+);
+
+insertOccurrence:
+INSERT INTO lesson_occurrences(lesson_id, date)
+VALUES (?, ?);
+
+getOccurrencesForLesson:
+SELECT * FROM lesson_occurrences
+WHERE lesson_id = ?
+ORDER BY date;

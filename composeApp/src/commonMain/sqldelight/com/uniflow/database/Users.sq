@@ -1,0 +1,10 @@
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL UNIQUE
+);
+
+insertUser:
+INSERT INTO users(username) VALUES (?);
+
+getUsers:
+SELECT * FROM users;

@@ -1,0 +1,17 @@
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL UNIQUE,
+  password_hash BLOB NOT NULL,
+  password_salt BLOB NOT NULL,
+  created_at INTEGER NOT NULL
+);
+
+getUserByUsername:
+SELECT * FROM users WHERE username = ?;
+
+countUsers:
+SELECT COUNT(*) FROM users;
+
+insertUser:
+INSERT INTO users(username, password_hash, password_salt, created_at)
+VALUES (?, ?, ?, ?);

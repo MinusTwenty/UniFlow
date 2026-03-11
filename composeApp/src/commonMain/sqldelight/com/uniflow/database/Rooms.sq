@@ -1,0 +1,10 @@
+CREATE TABLE rooms (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE
+);
+
+insertRoom:
+INSERT INTO rooms(name) VALUES (?);
+
+getRoomByName:
+SELECT * FROM rooms WHERE name = ?;

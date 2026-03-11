@@ -1,0 +1,10 @@
+CREATE TABLE teachers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE
+);
+
+insertTeacher:
+INSERT INTO teachers(name) VALUES (?);
+
+getTeacherByName:
+SELECT * FROM teachers WHERE name = ?;

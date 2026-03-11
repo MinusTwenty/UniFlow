@@ -1,0 +1,47 @@
+CREATE TABLE lessons (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+  course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  term_id INTEGER NOT NULL REFERENCES terms(id) ON DELETE CASCADE,
+
+  day_of_week INTEGER NOT NULL,     -- 1=Mon ... 7=Sun
+  start_time TEXT NOT NULL,         -- HH:MM
+  end_time TEXT NOT NULL,           -- HH:MM
+
+  week_type TEXT NOT NULL DEFAULT 'EVERY'
+    CHECK (week_type IN ('EVERY','ODD','EVEN')),
+
+  group_code TEXT NOT NULL DEFAULT '',
+  lesson_type TEXT NOT NULL DEFAULT 'OTHER'
+    CHECK (lesson_type IN ('LECTURE','SEMINAR','PRACTICE','SPORT','OTHER')),
+
+  room_id INTEGER REFERENCES rooms(id),
+  teacher_id INTEGER REFERENCES teachers(id),
+
+  valid_from TEXT NOT NULL, -- YYYY-MM-DD
+  valid_to TEXT NOT NULL,   -- YYYY-MM-DD
+
+  note TEXT
+);
+
+insertLesson:
+INSERT INTO lessons(
+  course_id, term_id, day_of_week, start_time, end_time,
+  week_type, group_code, lesson_type,
+  room_id, teacher_id, valid_from, valid_to, note
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+getLessonsForCourseTerm:
+SELECT * FROM lessons
+WHERE course_id = ? AND term_id = ?
+ORDER BY day_of_week, start_time;
+
+-- User órarend egy napra (enrollment alapján szűr)
+getUserLessonsForDay:
+SELECT l.*
+FROM lessons l
+JOIN enrollments e ON e.course_id = l.course_id AND e.term_id = l.term_id
+WHERE e.user_id = ?
+  AND l.term_id = ?
+  AND l.day_of_week = ?
+ORDER BY l.start_time;
