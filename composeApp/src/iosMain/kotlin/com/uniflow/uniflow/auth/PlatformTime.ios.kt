@@ -1,5 +1,7 @@
 package com.uniflow.uniflow.auth
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 actual fun getCurrentTimeMillis(): Long = Clock.System.now().toEpochMilliseconds()

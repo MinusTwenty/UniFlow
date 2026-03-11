@@ -1,47 +1,98 @@
 package com.uniflow.uniflow
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.uniflow.uniflow.home.HomeTop
 import com.uniflow.uniflow.home.LessonCard
 import com.uniflow.uniflow.home.StudentInfo
+import com.uniflow.uniflow.ui.settings.SettingsScreen
+import com.uniflow.uniflow.ui.theme.UniFlowAppTheme
+import com.uniflow.uniflow.ui.theme.UniFlowBackground
+import com.uniflow.uniflow.ui.theme.UniFlowThemeMode
+import com.uniflow.uniflow.settings.ThemeSettings
+import com.russhwolf.settings.Settings
+
+private enum class MainTab {
+    HOME,
+    SETTINGS
+}
 
 @Composable
 fun App() {
+    val themeSettings = remember { ThemeSettings(Settings()) }
     var isLoggedIn by remember { mutableStateOf(false) }
+    var selectedTheme by remember { mutableStateOf(themeSettings.getSavedTheme()) }
+    var selectedTab by remember { mutableStateOf(MainTab.HOME) }
 
-    MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
+    UniFlowAppTheme(mode = selectedTheme) {
+        UniFlowBackground {
             if (!isLoggedIn) {
-                // LOGIN SCREEN
                 LoginScreenWithValidation(
                     onLoginSuccess = { isLoggedIn = true }
                 )
             } else {
-                // MAIN SCREEN (HOME)
-                HomeTop(
-                    student = StudentInfo(
-                        uniShort = "UJS",
-                        fullName = "Pástó Vilmos Márk",
-                        weekType = "" // parity is calculated inside HomeTop
-                    ),
-                    location = "Tornaterem",
-                    building = "B épület",
-                    dateText = "2025.09.30.",
-                    nextRoom = "G312",
-                    nextTeacher = "XY",
-                    upcoming = demoLessons(),
-                    nowTime = ""
-                )
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                    bottomBar = {
+                        NavigationBar {
+                            NavigationBarItem(
+                                selected = selectedTab == MainTab.HOME,
+                                onClick = { selectedTab = MainTab.HOME },
+                                label = { Text("Főoldal") },
+                                icon = {}
+                            )
+                            NavigationBarItem(
+                                selected = selectedTab == MainTab.SETTINGS,
+                                onClick = { selectedTab = MainTab.SETTINGS },
+                                label = { Text("Beállítások") },
+                                icon = {}
+                            )
+                        }
+                    }
+                ) { innerPadding ->
+                    when (selectedTab) {
+                        MainTab.HOME -> {
+                            HomeTop(
+                                modifier = Modifier.padding(innerPadding),
+                                student = StudentInfo(
+                                    uniShort = "UJS",
+                                    fullName = "Pástó Vilmos Márk",
+                                    weekType = ""
+                                ),
+                                location = "Tornaterem",
+                                building = "B épület",
+                                dateText = "2025.09.30.",
+                                nextRoom = "G312",
+                                nextTeacher = "XY",
+                                upcoming = demoLessons(),
+                                nowTime = ""
+                            )
+                        }
+
+                        MainTab.SETTINGS -> {
+                            SettingsScreen(
+                                modifier = Modifier.padding(innerPadding),
+                                selectedTheme = selectedTheme,
+                                onThemeSelected = {
+                                    selectedTheme = it
+                                    themeSettings.saveTheme(it)
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
 
-// TEMP: demo lessons until API/import
 private fun demoLessons(): List<LessonCard> = listOf(
     LessonCard(code = "TOR", time = "12:15-13:00", room = "B-02", teacher = "Tanár: XY"),
     LessonCard(code = "PS1", time = "13:00-13:45", room = "B-03", teacher = "Tanár: XY"),

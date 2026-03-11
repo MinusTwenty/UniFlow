@@ -1,15 +1,38 @@
 package com.uniflow.uniflow
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.uniflow.uniflow.auth.FakeAuthRepository
 import com.uniflow.uniflow.auth.LoginRequest
+import com.uniflow.uniflow.ui.theme.UniFlowGlassCard
+import com.uniflow.uniflow.ui.theme.UniFlowTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -18,6 +41,7 @@ fun LoginScreenWithValidation(
 ) {
     val repository = remember { FakeAuthRepository() }
     val scope = rememberCoroutineScope()
+    val colors = UniFlowTheme.colors
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -28,85 +52,161 @@ fun LoginScreenWithValidation(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("UniFlow", style = MaterialTheme.typography.headlineMedium)
-
-        Spacer(Modifier.height(24.dp))
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Ais azonosító") },
-            modifier = Modifier.fillMaxWidth()
+        Text(
+            text = "UniFlow",
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.SemiBold,
+            color = colors.textPrimary
         )
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Jelszó") },
-            visualTransformation = PasswordVisualTransformation(),
+        UniFlowGlassCard(
             modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically
         ) {
-            Checkbox(checked = rememberMe, onCheckedChange = { rememberMe = it })
-            Text("Emlékezz rám")
-        }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(18.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Ais azonosító") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(18.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = colors.textPrimary,
+                        unfocusedTextColor = colors.textPrimary,
+                        focusedLabelColor = colors.textSecondary,
+                        unfocusedLabelColor = colors.textSecondary,
+                        cursorColor = colors.accent,
+                        focusedBorderColor = colors.glassBorder,
+                        unfocusedBorderColor = colors.glassBorder,
+                        focusedContainerColor = colors.glassSurface,
+                        unfocusedContainerColor = colors.glassSurface
+                    )
+                )
 
-        Spacer(Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-        Button(
-            onClick = {
-                isLoading = true
-                message = ""
-                scope.launch {
-                    try {
-                        repository.login(
-                            LoginRequest(email = email, password = password, rememberMe = rememberMe)
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Jelszó") },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    shape = RoundedCornerShape(18.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = colors.textPrimary,
+                        unfocusedTextColor = colors.textPrimary,
+                        focusedLabelColor = colors.textSecondary,
+                        unfocusedLabelColor = colors.textSecondary,
+                        cursorColor = colors.accent,
+                        focusedBorderColor = colors.glassBorder,
+                        unfocusedBorderColor = colors.glassBorder,
+                        focusedContainerColor = colors.glassSurface,
+                        unfocusedContainerColor = colors.glassSurface
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = rememberMe,
+                        onCheckedChange = { rememberMe = it },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = colors.accent,
+                            uncheckedColor = colors.textSecondary,
+                            checkmarkColor = colors.textPrimary
                         )
-                        message = "Sikeres belépés"
+                    )
 
-                        onLoginSuccess()
-                    } catch (e: Exception) {
-                        message = "Sikertelen belépés"
-                    } finally {
-                        isLoading = false
-                    }
+                    Text(
+                        text = "Emlékezz rám",
+                        color = colors.textPrimary,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
                 }
-            },
-            enabled = !isLoading,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(if (isLoading) "Bejelentkezés..." else "Belépés")
-        }
 
-        Spacer(Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
-        TextButton(
-            onClick = { onLoginSuccess() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Átugrás (beta)")
-        }
+                Button(
+                    onClick = {
+                        isLoading = true
+                        message = ""
 
-        if (message.isNotEmpty()) {
-            val msgColor =
-                if (message == "Sikeres belépés") MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.error
+                        scope.launch {
+                            try {
+                                repository.login(
+                                    LoginRequest(
+                                        email = email,
+                                        password = password,
+                                        rememberMe = rememberMe
+                                    )
+                                )
+                                message = "Sikeres belépés"
+                                onLoginSuccess()
+                            } catch (e: Exception) {
+                                message = "Sikertelen belépés"
+                            } finally {
+                                isLoading = false
+                            }
+                        }
+                    },
+                    enabled = !isLoading,
+                    shape = RoundedCornerShape(999.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colors.accent,
+                        contentColor = colors.textPrimary
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp)
+                ) {
+                    Text(
+                        text = if (isLoading) "Bejelentkezés..." else "Belépés",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
 
-            Text(
-                text = message,
-                color = msgColor
-            )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TextButton(
+                    onClick = { onLoginSuccess() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Átugrás (beta)",
+                        color = colors.textSecondary
+                    )
+                }
+
+                if (message.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val msgColor =
+                        if (message == "Sikeres belépés") colors.success
+                        else colors.danger
+
+                    Text(
+                        text = message,
+                        color = msgColor,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
         }
     }
 }

@@ -11,11 +11,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.uniflow.uniflow.ui.theme.GlassChip
+import com.uniflow.uniflow.ui.theme.UniFlowGlassCard
+import com.uniflow.uniflow.ui.theme.UniFlowTheme
 import kotlinx.coroutines.delay
 import kotlinx.datetime.LocalDate
 
 @Composable
 fun HomeTop(
+    modifier: Modifier = Modifier,
     student: StudentInfo,
     location: String,
     building: String,
@@ -77,36 +81,54 @@ fun HomeTop(
                 }
 
                 // Week chips in a single row
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
+                FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    InfoChip("ISO hét: ${iso.week}")
-                    InfoChip(if (parity == WeekUtil.WeekParity.Even) "Páros hét" else "Páratlan hét")
-                    acad?.let { InfoChip("Akadémiai hét: $it") }
+                    GlassChip(text = "ISO hét: ${iso.week}")
+                    GlassChip(
+                        text = if (parity == WeekUtil.WeekParity.Even) "Páros hét" else "Páratlan hét"
+                    )
+                    acad?.let {
+                        GlassChip(text = "Akadémiai hét: $it")
+                    }
                 }
             }
 
             Spacer(Modifier.height(12.dp))
 
             // Section: Location / meta
-            SectionCard(title = "Óra adatok") {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Column(Modifier.weight(1f)) {
-                        Text("Hely: $location", style = MaterialTheme.typography.bodyMedium)
-                        Text("Épület: $building", style = MaterialTheme.typography.bodyMedium)
-                        Text("Dátum: $dateText", style = MaterialTheme.typography.bodyMedium)
-                    }
-                    Column(Modifier.weight(1f)) {
-                        Text("Köv. hely: $nextRoom", style = MaterialTheme.typography.bodyMedium)
-                        Text("Tanár: $nextTeacher", style = MaterialTheme.typography.bodyMedium)
+            UniFlowGlassCard(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Óra adatok",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = UniFlowTheme.colors.textPrimary
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text("Hely: $location", color = UniFlowTheme.colors.textPrimary)
+                            Text("Épület: $building", color = UniFlowTheme.colors.textPrimary)
+                            Text("Dátum: $dateText", color = UniFlowTheme.colors.textPrimary)
+                        }
+
+                        Column {
+                            Text("Köv. hely: $nextRoom", color = UniFlowTheme.colors.textPrimary)
+                            Text("Tanár: $nextTeacher", color = UniFlowTheme.colors.textPrimary)
+                        }
                     }
                 }
             }
-
             Spacer(Modifier.height(12.dp))
 
             // Section: Szünet – appears before first lesson and between lessons, counts down
