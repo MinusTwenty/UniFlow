@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    id("app.cash.sqldelight") version "2.2.1"
 }
 
 kotlin {
@@ -53,6 +54,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
+            implementation("org.kotlincrypto.hash:sha2:0.6.0")
             implementation("com.russhwolf:multiplatform-settings-no-arg:1.3.0")
         }
         commonTest.dependencies {
@@ -90,5 +92,14 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    implementation("app.cash.sqldelight:runtime:2.2.1")
+}
+
+sqldelight {
+    databases {
+        create("UniFlowDatabase") {
+            packageName.set("com.uniflow.database")
+        }
+    }
 }
 
