@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.uniflow.uniflow.auth.FakeAuthRepository
+import com.uniflow.uniflow.auth.FakeAuthApi
 import com.uniflow.uniflow.auth.LoginRequest
 import com.uniflow.uniflow.ui.theme.UniFlowGlassCard
 import com.uniflow.uniflow.ui.theme.UniFlowTheme
@@ -37,13 +37,13 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreenWithValidation(
+    repository: FakeAuthApi,
     onLoginSuccess: () -> Unit
 ) {
-    val repository = remember { FakeAuthRepository() }
     val scope = rememberCoroutineScope()
     val colors = UniFlowTheme.colors
 
-    var email by remember { mutableStateOf("") }
+    var identifier by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var rememberMe by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf("") }
@@ -75,9 +75,9 @@ fun LoginScreenWithValidation(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = { Text("Ais azonosító") },
+                    value = identifier,
+                    onValueChange = { identifier = it },
+                    label = { Text("AIS azonosító") },
                     singleLine = true,
                     shape = RoundedCornerShape(18.dp),
                     modifier = Modifier.fillMaxWidth(),
@@ -151,14 +151,14 @@ fun LoginScreenWithValidation(
                             try {
                                 repository.login(
                                     LoginRequest(
-                                        email = email,
+                                        identifier = identifier,
                                         password = password,
                                         rememberMe = rememberMe
                                     )
                                 )
                                 message = "Sikeres belépés"
                                 onLoginSuccess()
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 message = "Sikertelen belépés"
                             } finally {
                                 isLoading = false

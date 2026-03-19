@@ -27,7 +27,7 @@ kotlin {
         }
     }
 
-    js {
+ /*   js {
         browser()
         binaries.executable()
     }
@@ -36,13 +36,20 @@ kotlin {
     wasmJs {
         browser()
         binaries.executable()
-    }
+   }
+  */
 
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation("app.cash.sqldelight:android-driver:2.2.1")
         }
+
+        iosMain.dependencies {
+            implementation("app.cash.sqldelight:native-driver:2.2.1")
+        }
+
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)

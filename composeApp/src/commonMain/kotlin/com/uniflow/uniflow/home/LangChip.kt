@@ -9,17 +9,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.uniflow.uniflow.ui.theme.UniFlowTheme
 
 @Composable
 fun LangChip(text: String) {
     Box(
         modifier = Modifier
             .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
+                color = UniFlowTheme.colors.chipBackground,
                 shape = RoundedCornerShape(8.dp)
             )
             .padding(horizontal = 10.dp, vertical = 6.dp)
     ) {
-        Text(text, style = MaterialTheme.typography.labelMedium)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium,
+            color = UniFlowTheme.colors.chipText
+        )
     }
 }

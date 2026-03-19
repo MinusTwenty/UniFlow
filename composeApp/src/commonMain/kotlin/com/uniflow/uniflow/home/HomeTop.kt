@@ -48,7 +48,6 @@ fun HomeTop(
         }
     }
 
-    Surface(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -67,14 +66,16 @@ fun HomeTop(
                     Text(
                         text = student.uniShort,
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = UniFlowTheme.colors.textPrimary
                     )
                     Spacer(Modifier.width(12.dp))
                     Text(
                         text = student.fullName,
                         style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        color = UniFlowTheme.colors.textPrimary
                     )
                     Spacer(Modifier.weight(1f))
                     LangChip("HU")
@@ -173,5 +174,4 @@ fun HomeTop(
                 }
             }
         }
-    }
 }

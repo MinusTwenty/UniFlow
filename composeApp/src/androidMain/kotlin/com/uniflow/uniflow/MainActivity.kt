@@ -3,12 +3,15 @@ package com.uniflow.uniflow
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import com.uniflow.uniflow.data.DatabaseDriverFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            App()   // <- root composable that handles Login -> HomeTop
+            App(
+                databaseDriverFactory = DatabaseDriverFactory(this)
+            )   // <- root composable that handles Login -> HomeTop
         }
     }
 }

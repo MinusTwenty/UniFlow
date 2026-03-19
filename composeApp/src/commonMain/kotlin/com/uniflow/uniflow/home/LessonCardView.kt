@@ -2,12 +2,15 @@ package com.uniflow.uniflow.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.uniflow.uniflow.ui.theme.UniFlowGlassCard
+import com.uniflow.uniflow.ui.theme.UniFlowTheme
 
 @Composable
 fun LessonCardView(
@@ -17,24 +20,17 @@ fun LessonCardView(
     modifier: Modifier = Modifier
 ) {
     val stripeColor = when (status) {
-        LessonStatus.ACTIVE -> MaterialTheme.colorScheme.primary
-        LessonStatus.UPCOMING -> MaterialTheme.colorScheme.secondary
-        LessonStatus.PAST -> MaterialTheme.colorScheme.outlineVariant
+        LessonStatus.ACTIVE -> UniFlowTheme.colors.accent
+        LessonStatus.UPCOMING -> UniFlowTheme.colors.warning
+        LessonStatus.PAST -> UniFlowTheme.colors.divider
     }
 
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
+    UniFlowGlassCard(modifier = modifier) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
         ) {
-            // left status stripe
             Box(
                 Modifier
                     .width(4.dp)
@@ -42,31 +38,42 @@ fun LessonCardView(
                     .background(stripeColor)
             )
 
-            // lesson details
             Column(
                 modifier = Modifier
                     .padding(10.dp)
                     .weight(1f)
             ) {
                 Text(
-                    lesson.code,
+                    text = lesson.code,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = UniFlowTheme.colors.textPrimary
                 )
 
                 Spacer(Modifier.height(4.dp))
-                Text(lesson.time, style = MaterialTheme.typography.bodySmall)
-                Text(lesson.room, style = MaterialTheme.typography.bodySmall)
+
                 Text(
-                    lesson.teacher,
+                    text = lesson.time,
                     style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    color = UniFlowTheme.colors.textSecondary
                 )
 
-                // show only when active AND there is positive break time until the next lesson
+                Text(
+                    text = lesson.room,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = UniFlowTheme.colors.textSecondary
+                )
+
+                Text(
+                    text = lesson.teacher,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = UniFlowTheme.colors.textSecondary
+                )
+
                 if (status == LessonStatus.ACTIVE && breakToNextMinutes != null && breakToNextMinutes > 0) {
                     Spacer(Modifier.height(4.dp))
                     val hours = breakToNextMinutes / 60
@@ -79,7 +86,7 @@ fun LessonCardView(
                     Text(
                         text = timeText,
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
+                        color = UniFlowTheme.colors.accent
                     )
                 }
             }

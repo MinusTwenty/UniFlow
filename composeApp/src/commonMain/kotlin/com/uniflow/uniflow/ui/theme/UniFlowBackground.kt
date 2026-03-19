@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -18,23 +17,48 @@ fun UniFlowBackground(
 ) {
     val c = UniFlowTheme.colors
 
-    val backgroundBrush = Brush.radialGradient(
+    val base = Brush.verticalGradient(
         colors = listOf(
-            Color(0xFF1A2742),
             c.backgroundGradientTop,
-            c.backgroundGradientBottom,
-            Color(0xFF0A1020)
+            blend(c.backgroundGradientTop, c.backgroundGradientBottom, 0.38f),
+            c.backgroundGradientBottom
+        )
+    )
+
+    val softGlow = Brush.radialGradient(
+        colors = listOf(
+            c.accent.copy(alpha = 0.10f),
+            Color.Transparent
         ),
-        center = Offset(500f, 250f),
-        radius = 1200f
+        center = androidx.compose.ui.geometry.Offset(220f, 180f),
+        radius = 900f
+    )
+
+    val vignette = Brush.radialGradient(
+        colors = listOf(
+            Color.Transparent,
+            Color.Black.copy(alpha = 0.14f)
+        ),
+        center = androidx.compose.ui.geometry.Offset(600f, 900f),
+        radius = 1400f
     )
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(backgroundBrush)
+            .background(base)
+            .background(softGlow)
+            .background(vignette)
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         content()
     }
+}
+
+private fun blend(a: Color, b: Color, ratio: Float): Color {
+    val r = a.red + (b.red - a.red) * ratio
+    val g = a.green + (b.green - a.green) * ratio
+    val bl = a.blue + (b.blue - a.blue) * ratio
+    val alpha = a.alpha + (b.alpha - a.alpha) * ratio
+    return Color(r, g, bl, alpha)
 }

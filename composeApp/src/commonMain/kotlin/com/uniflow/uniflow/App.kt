@@ -8,15 +8,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import com.russhwolf.settings.Settings
+import com.uniflow.uniflow.auth.DbAuthRepository
+import com.uniflow.uniflow.data.DatabaseDriverFactory
+import com.uniflow.uniflow.data.provideDatabase
 import com.uniflow.uniflow.home.HomeTop
 import com.uniflow.uniflow.home.LessonCard
 import com.uniflow.uniflow.home.StudentInfo
+import com.uniflow.uniflow.settings.ThemeSettings
 import com.uniflow.uniflow.ui.settings.SettingsScreen
 import com.uniflow.uniflow.ui.theme.UniFlowAppTheme
 import com.uniflow.uniflow.ui.theme.UniFlowBackground
-import com.uniflow.uniflow.ui.theme.UniFlowThemeMode
-import com.uniflow.uniflow.settings.ThemeSettings
-import com.russhwolf.settings.Settings
 
 private enum class MainTab {
     HOME,
@@ -24,16 +26,22 @@ private enum class MainTab {
 }
 
 @Composable
-fun App() {
+fun App(
+    databaseDriverFactory: DatabaseDriverFactory
+) {
     val themeSettings = remember { ThemeSettings(Settings()) }
     var isLoggedIn by remember { mutableStateOf(false) }
     var selectedTheme by remember { mutableStateOf(themeSettings.getSavedTheme()) }
     var selectedTab by remember { mutableStateOf(MainTab.HOME) }
 
+    val db = remember { provideDatabase(databaseDriverFactory) }
+    val authRepository = remember { DbAuthRepository(db) }
+
     UniFlowAppTheme(mode = selectedTheme) {
         UniFlowBackground {
             if (!isLoggedIn) {
                 LoginScreenWithValidation(
+                    repository = authRepository,
                     onLoginSuccess = { isLoggedIn = true }
                 )
             } else {

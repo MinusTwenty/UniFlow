@@ -95,19 +95,19 @@ private fun themeBundle(mode: UniFlowThemeMode): ThemeBundle {
             extra = UniFlowExtraColors(
                 backgroundGradientTop = Color(0xFF11192B),
                 backgroundGradientBottom = Color(0xFF090F1C),
-                glassSurface = Color(0xCC24324A),
-                glassBorder = Color(0x30FFFFFF),
-                cardBorder = Color(0x14FFFFFF),
+                glassSurface = Color(0xF3243650),
+                glassBorder = Color(0x3AFFFFFF),
+                cardBorder = Color(0x24FFFFFF),
                 textPrimary = Color(0xFFF3F6FB),
                 textSecondary = Color(0xFFB8C2D3),
                 accent = Color(0xFF3E73F0),
                 success = Color(0xFF34D399),
                 warning = Color(0xFFFBBF24),
                 danger = Color(0xFFF87171),
-                chipBackground = Color(0x663A465C),
+                chipBackground = Color(0x9C34445F),
                 chipText = Color(0xFFF3F6FB),
-                navBarBackground = Color(0x99101828),
-                divider = Color(0x12FFFFFF)
+                navBarBackground = Color(0xCC101828),
+                divider = Color(0x26FFFFFF)
             )
         )
 
@@ -126,8 +126,8 @@ private fun themeBundle(mode: UniFlowThemeMode): ThemeBundle {
             extra = UniFlowExtraColors(
                 backgroundGradientTop = Color(0xFF0B1E1A),
                 backgroundGradientBottom = Color(0xFF0F2B25),
-                glassSurface = Color(0x12FFFFFF),
-                glassBorder = Color(0x20A7F3D0),
+                glassSurface = Color(0xEE143D36),
+                glassBorder = Color(0x3AA7F3D0),
                 cardBorder = Color(0x16A7F3D0),
                 textPrimary = Color(0xFFECFDF5),
                 textSecondary = Color(0xFFA7F3D0),
@@ -135,10 +135,10 @@ private fun themeBundle(mode: UniFlowThemeMode): ThemeBundle {
                 success = Color(0xFF6EE7B7),
                 warning = Color(0xFFFBBF24),
                 danger = Color(0xFFF87171),
-                chipBackground = Color(0x1634D399),
+                chipBackground = Color(0x99304E47),
                 chipText = Color(0xFFECFDF5),
-                navBarBackground = Color(0xCC0B1E1A),
-                divider = Color(0x18A7F3D0)
+                navBarBackground = Color(0xE60B1E1A),
+                divider = Color(0x22A7F3D0)
             )
         )
 
@@ -157,8 +157,8 @@ private fun themeBundle(mode: UniFlowThemeMode): ThemeBundle {
             extra = UniFlowExtraColors(
                 backgroundGradientTop = Color(0xFF1A0F1F),
                 backgroundGradientBottom = Color(0xFF25142D),
-                glassSurface = Color(0x14FFFFFF),
-                glassBorder = Color(0x22FBCFE8),
+                glassSurface = Color(0xEE2B1C35),
+                glassBorder = Color(0x44FBCFE8),
                 cardBorder = Color(0x18FBCFE8),
                 textPrimary = Color(0xFFFDF2F8),
                 textSecondary = Color(0xFFFBCFE8),
@@ -166,10 +166,10 @@ private fun themeBundle(mode: UniFlowThemeMode): ThemeBundle {
                 success = Color(0xFF4ADE80),
                 warning = Color(0xFFF59E0B),
                 danger = Color(0xFFFB7185),
-                chipBackground = Color(0x1EFFFFFF),
+                chipBackground = Color(0x993B2944),
                 chipText = Color(0xFFFDF2F8),
-                navBarBackground = Color(0xCC1A0F1F),
-                divider = Color(0x16FFFFFF)
+                navBarBackground = Color(0xE61A0F1F),
+                divider = Color(0x22FBCFE8)
             )
         )
 
@@ -188,8 +188,8 @@ private fun themeBundle(mode: UniFlowThemeMode): ThemeBundle {
             extra = UniFlowExtraColors(
                 backgroundGradientTop = Color(0xFFF5F7FB),
                 backgroundGradientBottom = Color(0xFFEFF4FA),
-                glassSurface = Color(0xCCFFFFFF),
-                glassBorder = Color(0x66FFFFFF),
+                glassSurface = Color(0xFCFFFFFF),
+                glassBorder = Color(0x48C9D5E2),
                 cardBorder = Color(0xFFDCE3EC),
                 textPrimary = Color(0xFF1E293B),
                 textSecondary = Color(0xFF64748B),
@@ -197,10 +197,10 @@ private fun themeBundle(mode: UniFlowThemeMode): ThemeBundle {
                 success = Color(0xFF10B981),
                 warning = Color(0xFFF59E0B),
                 danger = Color(0xFFEF4444),
-                chipBackground = Color(0xFFF1F5F9),
+                chipBackground = Color(0xFFF3F6FA),
                 chipText = Color(0xFF334155),
-                navBarBackground = Color(0xE6FFFFFF),
-                divider = Color(0xFFE2E8F0)
+                navBarBackground = Color(0xF7FFFFFF),
+                divider = Color(0xFFD8E0E8)
             )
         )
     }

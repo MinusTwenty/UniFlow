@@ -22,7 +22,7 @@ fun UniFlowGlassCard(
     Box(
         modifier = modifier
             .shadow(
-                elevation = 10.dp,
+                elevation = 4.dp,
                 shape = shape,
                 clip = false
             )
