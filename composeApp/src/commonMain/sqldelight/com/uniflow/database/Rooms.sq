@@ -8,3 +8,6 @@ INSERT INTO rooms(name) VALUES (?);
 
 getRoomByName:
 SELECT * FROM rooms WHERE name = ?;
+
+getRoomById:
+SELECT * FROM rooms WHERE id = ?;

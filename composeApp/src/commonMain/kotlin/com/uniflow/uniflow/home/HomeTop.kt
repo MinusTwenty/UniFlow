@@ -1,7 +1,5 @@
 package com.uniflow.uniflow.home
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -11,6 +9,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.statusBarsPadding
 import com.uniflow.uniflow.ui.theme.GlassChip
 import com.uniflow.uniflow.ui.theme.UniFlowGlassCard
 import com.uniflow.uniflow.ui.theme.UniFlowTheme
@@ -27,7 +32,9 @@ fun HomeTop(
     nextRoom: String,
     nextTeacher: String,
     upcoming: List<LessonCard>,
-    nowTime: String // kept for signature compatibility, not used
+    nowTime: String,
+    lessonLayoutMode: LessonLayoutMode,
+    onLessonLayoutModeChange: (LessonLayoutMode) -> Unit
 ) {
     // --- Week calculations ---
     val today = WeekUtil.today()
@@ -48,13 +55,14 @@ fun HomeTop(
         }
     }
 
-        Column(
+    Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 96.dp )
         ) {
-            // Section: Student info
+            // Hallgató
             SectionCard(title = "Hallgató") {
                 Row(
                     modifier = Modifier
@@ -81,7 +89,7 @@ fun HomeTop(
                     LangChip("HU")
                 }
 
-                // Week chips in a single row
+                // Hetek
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -98,80 +106,138 @@ fun HomeTop(
 
             Spacer(Modifier.height(12.dp))
 
-            // Section: Location / meta
-            UniFlowGlassCard(
-                modifier = Modifier.fillMaxWidth()
+        //Óra adatok
+        UniFlowGlassCard(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Óra adatok",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = UniFlowTheme.colors.textPrimary
-                    )
+                Text(
+                    text = "Óra adatok",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = UniFlowTheme.colors.textPrimary
+                )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column {
-                            Text("Hely: $location", color = UniFlowTheme.colors.textPrimary)
-                            Text("Épület: $building", color = UniFlowTheme.colors.textPrimary)
-                            Text("Dátum: $dateText", color = UniFlowTheme.colors.textPrimary)
-                        }
-
-                        Column {
-                            Text("Köv. hely: $nextRoom", color = UniFlowTheme.colors.textPrimary)
-                            Text("Tanár: $nextTeacher", color = UniFlowTheme.colors.textPrimary)
-                        }
-                    }
-                }
-            }
-            Spacer(Modifier.height(12.dp))
-
-            // Section: Szünet – appears before first lesson and between lessons, counts down
-            run {
-                val remaining = findBreakRemainingSeconds(nowSec, upcoming)
-                if (remaining != null && remaining > 0) {
-                    SectionCard(title = "Szünet") {
-                        Text(
-                            text = "A következő óráig: ${formatHuDurationDynamic(remaining)}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    Spacer(Modifier.height(12.dp))
-                }
-            }
-
-            // Section: Lessons
-            SectionCard(title = "Következő órák") {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    val statuses = upcoming.map { it to statusFor(it, nowSec) }
-                    val activeIndex = statuses.indexOfFirst { it.second == LessonStatus.ACTIVE }
-                    val nextIndex = statuses.indexOfFirst { it.second == LessonStatus.UPCOMING }
-                    val breakMinutes =
-                        if (activeIndex >= 0 && nextIndex == activeIndex + 1)
-                            breakBetween(upcoming[activeIndex], upcoming[nextIndex])
-                        else null
+                    Column {
+                        Text("Hely: $location", color = UniFlowTheme.colors.textPrimary)
+                        Text("Épület: $building", color = UniFlowTheme.colors.textPrimary)
+                        Text("Dátum: $dateText", color = UniFlowTheme.colors.textPrimary)
+                    }
 
-                    upcoming.take(4).forEachIndexed { index, lesson ->
-                        val status = statuses.getOrNull(index)?.second ?: LessonStatus.PAST
-                        val breakToNext = if (index == activeIndex) breakMinutes else null
-                        LessonCardView(
-                            lesson = lesson,
-                            status = status,
-                            breakToNextMinutes = breakToNext,
-                            modifier = Modifier.weight(1f)
-                        )
+                    Column {
+                        Text("Köv. hely: $nextRoom", color = UniFlowTheme.colors.textPrimary)
+                        Text("Tanár: $nextTeacher", color = UniFlowTheme.colors.textPrimary)
                     }
                 }
             }
         }
+
+        Spacer(Modifier.height(12.dp))
+
+        //Szünet
+        run {
+            val remaining = findBreakRemainingSeconds(nowSec, upcoming)
+            if (remaining != null && remaining > 0) {
+                SectionCard(title = "Szünet") {
+                    Text(
+                        text = "A következő óráig: ${formatHuDurationDynamic(remaining)}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Spacer(Modifier.height(12.dp))
+            }
+        }
+
+        // Következő órák
+        UniFlowGlassCard(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Következő órák",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = UniFlowTheme.colors.textPrimary
+                    )
+
+                    LessonLayoutToggle(
+                        selectedMode = lessonLayoutMode,
+                        onModeChange = onLessonLayoutModeChange
+                    )
+                }
+
+                val statuses = upcoming.map { it to statusFor(it, nowSec) }
+                val activeIndex = statuses.indexOfFirst { it.second == LessonStatus.ACTIVE }
+                val nextIndex = statuses.indexOfFirst { it.second == LessonStatus.UPCOMING }
+                val breakMinutes =
+                    if (activeIndex >= 0 && nextIndex == activeIndex + 1)
+                        breakBetween(upcoming[activeIndex], upcoming[nextIndex])
+                    else null
+
+                if (upcoming.isEmpty()) {
+                    Text(
+                        text = "Erre a napra nincs óra.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = UniFlowTheme.colors.textSecondary
+                    )
+                } else {
+                    when (lessonLayoutMode) {
+                        LessonLayoutMode.HORIZONTAL -> {
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                itemsIndexed(upcoming) { index, lesson ->
+                                    val status = statuses.getOrNull(index)?.second ?: LessonStatus.PAST
+                                    val breakToNext = if (index == activeIndex) breakMinutes else null
+
+                                    LessonCardView(
+                                        lesson = lesson,
+                                        status = status,
+                                        breakToNextMinutes = breakToNext,
+                                        modifier = Modifier.width(200.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        LessonLayoutMode.VERTICAL -> {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                upcoming.forEachIndexed { index, lesson ->
+                                    val status = statuses.getOrNull(index)?.second ?: LessonStatus.PAST
+                                    val breakToNext = if (index == activeIndex) breakMinutes else null
+
+                                    LessonCardView(
+                                        lesson = lesson,
+                                        status = status,
+                                        breakToNextMinutes = breakToNext,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

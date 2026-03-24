@@ -6,9 +6,6 @@ import com.uniflow.database.UniFlowDatabase
 
 actual class DatabaseDriverFactory {
     actual fun createDriver(): SqlDriver {
-        return NativeSqliteDriver(
-            schema = UniFlowDatabase.Schema,
-            name = "uniflow.db"
-        )
+        return NativeSqliteDriver(UniFlowDatabase.Schema, "uniflow.db")
     }
 }

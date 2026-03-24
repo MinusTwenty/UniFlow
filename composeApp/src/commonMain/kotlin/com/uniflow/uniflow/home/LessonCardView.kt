@@ -40,12 +40,12 @@ fun LessonCardView(
 
             Column(
                 modifier = Modifier
-                    .padding(10.dp)
-                    .weight(1f)
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .fillMaxWidth()
             ) {
                 Text(
                     text = lesson.code,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -56,20 +56,20 @@ fun LessonCardView(
 
                 Text(
                     text = lesson.time,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = UniFlowTheme.colors.textSecondary
                 )
 
                 Text(
                     text = lesson.room,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = UniFlowTheme.colors.textSecondary
                 )
 
                 Text(
                     text = lesson.teacher,
                     style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     color = UniFlowTheme.colors.textSecondary
                 )

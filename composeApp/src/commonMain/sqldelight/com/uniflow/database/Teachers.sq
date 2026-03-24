@@ -8,3 +8,7 @@ INSERT INTO teachers(name) VALUES (?);
 
 getTeacherByName:
 SELECT * FROM teachers WHERE name = ?;
+
+getTeacherById:
+SELECT * FROM teachers
+WHERE id = ?;

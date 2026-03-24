@@ -6,7 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		7DD7ECD72F72CFC400F2DAAF /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DD7ECD62F72CFC400F2DAAF /* libsqlite3.tbd */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		7DD7ECD62F72CFC400F2DAAF /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		BF70A4C901A1C8431D28E8C6 /* uniflow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = uniflow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -41,6 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7DD7ECD72F72CFC400F2DAAF /* libsqlite3.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -60,8 +66,17 @@
 			children = (
 				B376C1751B3A0B6A84F1050B /* Configuration */,
 				700A7C79A498EE79F54F5FF6 /* iosApp */,
+				7DD7ECD52F72CFC400F2DAAF /* Frameworks */,
 				051943B0760EA3CB336B5EE9 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		7DD7ECD52F72CFC400F2DAAF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7DD7ECD62F72CFC400F2DAAF /* libsqlite3.tbd */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -315,6 +330,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				"OTHER_LDFLAGS[arch=*]" = (
+					"$(inherited)",
+					"-lsqlite3",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.pastovilmosmark.uniflow;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -342,6 +361,10 @@
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				"OTHER_LDFLAGS[arch=*]" = (
+					"$(inherited)",
+					"-lsqlite3",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.pastovilmosmark.uniflow;
 				SWIFT_EMIT_LOC_STRINGS = YES;

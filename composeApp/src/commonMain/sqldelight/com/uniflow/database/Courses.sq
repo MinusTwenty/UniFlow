@@ -14,3 +14,7 @@ SELECT * FROM courses WHERE code = ?;
 
 getAllCourses:
 SELECT * FROM courses ORDER BY code;
+
+getCourseById:
+SELECT * FROM courses
+WHERE id = ?;

@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginScreenWithValidation(
     repository: FakeAuthApi,
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: (Long) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val colors = UniFlowTheme.colors
@@ -149,7 +149,7 @@ fun LoginScreenWithValidation(
 
                         scope.launch {
                             try {
-                                repository.login(
+                                val response = repository.login(
                                     LoginRequest(
                                         identifier = identifier,
                                         password = password,
@@ -157,7 +157,7 @@ fun LoginScreenWithValidation(
                                     )
                                 )
                                 message = "Sikeres belépés"
-                                onLoginSuccess()
+                                onLoginSuccess(response.userId)
                             } catch (_: Exception) {
                                 message = "Sikertelen belépés"
                             } finally {
@@ -184,7 +184,7 @@ fun LoginScreenWithValidation(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 TextButton(
-                    onClick = { onLoginSuccess() },
+                    onClick = { onLoginSuccess(1L) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
