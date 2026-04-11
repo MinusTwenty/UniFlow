@@ -1,13 +1,14 @@
 package com.uniflow.uniflow.data.seed.semesters
 
+import com.uniflow.uniflow.data.seed.DemoAcademicCalendar
 import com.uniflow.uniflow.data.seed.model.DemoLessonSeed
 import com.uniflow.uniflow.data.seed.model.DemoSemesterSeed
 
 val user1Semester1Seed = DemoSemesterSeed(
     username = "134288",
-    termName = "1. év / 1. szemeszter",
-    termStart = "2023-09-11",
-    termEnd = "2023-12-09",
+    termName = "1. emberke / 1. szemeszter",
+    termStart = DemoAcademicCalendar.AUTUMN_START,
+    termEnd = DemoAcademicCalendar.AUTUMN_END,
     lessons = listOf(
         // Hétfő (1)
         DemoLessonSeed(
@@ -22,8 +23,8 @@ val user1Semester1Seed = DemoSemesterSeed(
             lessonType = "PRACTICE",
             roomName = "G312",
             teacherName = "Paksi",
-            validFrom = "2023-09-11",
-            validTo = "2023-12-09"
+            validFrom = DemoAcademicCalendar.AUTUMN_START,
+            validTo = DemoAcademicCalendar.AUTUMN_END
         ),
         DemoLessonSeed(
             courseCode = "AIdb/PHW",
@@ -37,8 +38,8 @@ val user1Semester1Seed = DemoSemesterSeed(
             lessonType = "LECTURE",
             roomName = "INF01",
             teacherName = "Marák",
-            validFrom = "2023-09-11",
-            validTo = "2023-12-09"
+            validFrom = DemoAcademicCalendar.AUTUMN_START,
+            validTo = DemoAcademicCalendar.AUTUMN_END
         ),
 
         // Kedd (2)
@@ -54,8 +55,8 @@ val user1Semester1Seed = DemoSemesterSeed(
             lessonType = "LECTURE",
             roomName = "INFO3",
             teacherName = "Végh",
-            validFrom = "2023-09-11",
-            validTo = "2023-12-09"
+            validFrom = DemoAcademicCalendar.AUTUMN_START,
+            validTo = DemoAcademicCalendar.AUTUMN_END
         ),
         DemoLessonSeed(
             courseCode = "AIdb/SPR",
@@ -69,27 +70,11 @@ val user1Semester1Seed = DemoSemesterSeed(
             lessonType = "SEMINAR",
             roomName = "INF01",
             teacherName = "Csóka",
-            validFrom = "2023-09-11",
-            validTo = "2023-12-09"
+            validFrom = DemoAcademicCalendar.AUTUMN_START,
+            validTo = DemoAcademicCalendar.AUTUMN_END
         ),
 
         // Szerda (3)
-        DemoLessonSeed(
-            courseCode = "AIdb/UDI",
-            courseName = "Bevezetés az informatikába",
-            credits = 0,
-            dayOfWeek = 3,
-            startTime = "09:40",
-            endTime = "11:00",
-            weekType = "EVERY",
-            groupCode = "",
-            lessonType = "OTHER",
-            roomName = "K102-K2",
-            teacherName = "Csóka",
-            validFrom = "2023-09-11",
-            validTo = "2023-12-09",
-            note = "Egyes alkalmak külön dátumosak lehetnek."
-        ),
         DemoLessonSeed(
             courseCode = "AIdb/UDI",
             courseName = "Bevezetés az informatikába",
@@ -102,8 +87,8 @@ val user1Semester1Seed = DemoSemesterSeed(
             lessonType = "SEMINAR",
             roomName = "G312",
             teacherName = "Csóka",
-            validFrom = "2023-09-11",
-            validTo = "2023-12-09"
+            validFrom = DemoAcademicCalendar.AUTUMN_START,
+            validTo = DemoAcademicCalendar.AUTUMN_END
         ),
         DemoLessonSeed(
             courseCode = "AIdb/MA1",
@@ -117,8 +102,8 @@ val user1Semester1Seed = DemoSemesterSeed(
             lessonType = "LECTURE",
             roomName = "DP002",
             teacherName = "Árki",
-            validFrom = "2023-09-11",
-            validTo = "2023-12-09"
+            validFrom = DemoAcademicCalendar.AUTUMN_START,
+            validTo = DemoAcademicCalendar.AUTUMN_END
         ),
         DemoLessonSeed(
             courseCode = "AIdb/MA1",
@@ -132,8 +117,8 @@ val user1Semester1Seed = DemoSemesterSeed(
             lessonType = "SEMINAR",
             roomName = "DP002",
             teacherName = "Árki",
-            validFrom = "2023-09-11",
-            validTo = "2023-12-09"
+            validFrom = DemoAcademicCalendar.AUTUMN_START,
+            validTo = DemoAcademicCalendar.AUTUMN_END
         ),
 
         // Csütörtök (4)
@@ -149,8 +134,8 @@ val user1Semester1Seed = DemoSemesterSeed(
             lessonType = "LECTURE",
             roomName = "DP005",
             teacherName = "Molnár",
-            validFrom = "2023-09-11",
-            validTo = "2023-12-09"
+            validFrom = DemoAcademicCalendar.AUTUMN_START,
+            validTo = DemoAcademicCalendar.AUTUMN_END
         ),
         DemoLessonSeed(
             courseCode = "AIdb/MA1",
@@ -164,8 +149,8 @@ val user1Semester1Seed = DemoSemesterSeed(
             lessonType = "PRACTICE",
             roomName = "DP005",
             teacherName = "Szalay",
-            validFrom = "2023-09-11",
-            validTo = "2023-12-09"
+            validFrom = DemoAcademicCalendar.AUTUMN_START,
+            validTo = DemoAcademicCalendar.AUTUMN_END
         ),
         DemoLessonSeed(
             courseCode = "VSA1a",
@@ -177,10 +162,10 @@ val user1Semester1Seed = DemoSemesterSeed(
             weekType = "EVERY",
             groupCode = "C",
             lessonType = "SPORT",
-            roomName = null,
+            roomName = "FITN",
             teacherName = "Bognár",
-            validFrom = "2023-09-11",
-            validTo = "2023-12-09"
+            validFrom = DemoAcademicCalendar.AUTUMN_START,
+            validTo = DemoAcademicCalendar.AUTUMN_END
         ),
         DemoLessonSeed(
             courseCode = "AIdb/TEX",
@@ -194,8 +179,8 @@ val user1Semester1Seed = DemoSemesterSeed(
             lessonType = "LECTURE",
             roomName = "K106-KINF0",
             teacherName = "Vontszemű",
-            validFrom = "2023-09-11",
-            validTo = "2023-12-09"
+            validFrom = DemoAcademicCalendar.AUTUMN_START,
+            validTo = DemoAcademicCalendar.AUTUMN_END
         ),
         DemoLessonSeed(
             courseCode = "AIdb/UDI",
@@ -209,8 +194,8 @@ val user1Semester1Seed = DemoSemesterSeed(
             lessonType = "PRACTICE",
             roomName = "K101-K1",
             teacherName = "Kiss",
-            validFrom = "2023-09-11",
-            validTo = "2023-12-09"
+            validFrom = DemoAcademicCalendar.AUTUMN_START,
+            validTo = DemoAcademicCalendar.AUTUMN_END
         ),
 
         // Péntek (5)
@@ -226,8 +211,8 @@ val user1Semester1Seed = DemoSemesterSeed(
             lessonType = "PRACTICE",
             roomName = "K102-K2",
             teacherName = "Takác",
-            validFrom = "2023-09-11",
-            validTo = "2023-12-09"
+            validFrom = DemoAcademicCalendar.AUTUMN_START,
+            validTo = DemoAcademicCalendar.AUTUMN_END
         ),
         DemoLessonSeed(
             courseCode = "AIdb/PR1",
@@ -245,12 +230,12 @@ val user1Semester1Seed = DemoSemesterSeed(
             validTo = "2023-12-09",
             note = "Csak adott dátumokon (lesson_occurrences).",
             occurrenceDates = listOf(
-                "2023-09-22",
-                "2023-09-29",
-                "2023-10-06",
-                "2023-10-27",
-                "2023-11-24",
-                "2023-12-08"
+                "2025-09-22",
+                "2025-09-29",
+                "2025-10-06",
+                "2025-10-27",
+                "2025-11-24",
+                "2025-12-08"
             )
         )
     )

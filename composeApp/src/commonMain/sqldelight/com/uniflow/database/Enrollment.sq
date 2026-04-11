@@ -13,3 +13,6 @@ VALUES (?, ?, ?);
 getEnrollmentsForUser:
 SELECT * FROM enrollments
 WHERE user_id = ?;
+
+deleteAllEnrollments:
+DELETE FROM enrollments;

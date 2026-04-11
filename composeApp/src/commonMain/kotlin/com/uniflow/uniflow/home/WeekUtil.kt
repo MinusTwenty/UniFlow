@@ -84,3 +84,15 @@ object WeekUtil {
         DayOfWeek.SUNDAY -> 7
     }
 }
+
+fun findActiveLessonRemainingSeconds(nowSeconds: Int, lessons: List<LessonCard>): Int? {
+    for (lesson in lessons) {
+        val range = parseRangeToSeconds(lesson.time) ?: continue
+        val start = range.first
+        val end = range.second
+        if (nowSeconds in start until end) {
+            return (end - nowSeconds).coerceAtLeast(0)
+        }
+    }
+    return null
+}

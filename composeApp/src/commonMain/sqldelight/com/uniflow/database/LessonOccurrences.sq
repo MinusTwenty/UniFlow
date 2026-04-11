@@ -13,3 +13,6 @@ getOccurrencesForLesson:
 SELECT * FROM lesson_occurrences
 WHERE lesson_id = ?
 ORDER BY date;
+
+deleteAllLessonOccurrences:
+DELETE FROM lesson_occurrences;

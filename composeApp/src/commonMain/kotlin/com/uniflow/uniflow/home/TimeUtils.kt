@@ -2,6 +2,7 @@ package com.uniflow.uniflow.home
 
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
 import kotlin.time.Clock
@@ -96,4 +97,13 @@ fun formatHuDurationDynamic(seconds: Int): String {
     val m = (seconds % 3600) / 60
     val s = seconds % 60
     return if (h >= 1) "${h} ó ${m} p" else "${m} p ${s} mp"
+}
+
+@OptIn(ExperimentalTime::class)
+fun currentDayOfWeekIso(): Int {
+    val date = Clock.System.now()
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .date
+
+    return date.dayOfWeek.isoDayNumber
 }

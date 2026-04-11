@@ -11,3 +11,6 @@ SELECT * FROM rooms WHERE name = ?;
 
 getRoomById:
 SELECT * FROM rooms WHERE id = ?;
+
+deleteAllRooms:
+DELETE FROM rooms;

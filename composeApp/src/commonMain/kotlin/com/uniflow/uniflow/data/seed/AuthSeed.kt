@@ -12,9 +12,9 @@ fun seedDemoUsers(db: UniFlowDatabase) {
 
     if (existingUsers > 0L) return
 
-    seedUser(db, username = "134288", password = "UniFlow123")
-    seedUser(db, username = "user2", password = "UniFlow123")
-    seedUser(db, username = "user3", password = "UniFlow123")
+    seedUser(db, username = "134288", password = "asd123")
+    seedUser(db, username = "111", password = "asd123")
+    seedUser(db, username = "222", password = "asd123")
 }
 
 @OptIn(ExperimentalTime::class)

@@ -12,3 +12,6 @@ SELECT * FROM teachers WHERE name = ?;
 getTeacherById:
 SELECT * FROM teachers
 WHERE id = ?;
+
+deleteAllTeachers:
+DELETE FROM teachers;

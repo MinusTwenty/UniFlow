@@ -21,7 +21,9 @@ import com.uniflow.uniflow.ui.theme.UniFlowThemeMode
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     selectedTheme: UniFlowThemeMode,
-    onThemeSelected: (UniFlowThemeMode) -> Unit
+    onThemeSelected: (UniFlowThemeMode) -> Unit,
+    onLogout: () -> Unit,
+    onDemoReset: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -84,6 +86,20 @@ fun SettingsScreen(
                 ThemeButton(
                     text = "Minimal Light",
                     onClick = { onThemeSelected(UniFlowThemeMode.MINIMAL_LIGHT) }
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                ThemeButton(
+                    text = "Kijelentkezés",
+                    onClick = onLogout
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                ThemeButton(
+                    text = "Demo adatok visszaállítása",
+                    onClick = onDemoReset
                 )
             }
         }

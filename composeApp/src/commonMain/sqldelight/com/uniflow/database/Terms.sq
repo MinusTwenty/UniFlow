@@ -15,3 +15,6 @@ SELECT * FROM terms WHERE name = ?;
 getAllTerms:
 SELECT * FROM terms
 ORDER BY start_date;
+
+deleteAllTerms:
+DELETE FROM terms;

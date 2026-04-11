@@ -17,7 +17,7 @@ fun GlassChip(
     modifier: Modifier = Modifier
 ) {
     val colors = UniFlowTheme.colors
-    val shape = RoundedCornerShape(14.dp)
+    val shape = RoundedCornerShape(6.dp)
 
     Box(
         modifier = modifier
