@@ -41,12 +41,21 @@ fun HomeTop(
     activeTerm: AcademicTerm?,
     availableTerms: List<AcademicTerm>,
     activeTermId: Long?,
-    onTermSelected: (Long) -> Unit
+    onTermSelected: (Long) -> Unit,
+    onSaveNote: (LessonCard, String) -> Unit,
+    notesForLesson: (LessonCard) -> List<LessonNoteUi>,
+    onDeleteNote: (LessonNoteUi) -> Unit,
+    onUpdateNote: (LessonNoteUi, String) -> Unit
 ) {
     // --- Week calculations ---
     val today = WeekUtil.today()
     val iso = WeekUtil.isoWeekInfo(today)
     val parity = WeekUtil.isoWeekParity(today)
+    var selectedLesson by remember { mutableStateOf<LessonCard?>(null) }
+    var quickMenuAnchor by remember { mutableStateOf<QuickMenuAnchor?>(null) }
+    var noteDialogLesson by remember { mutableStateOf<LessonCard?>(null) }
+    var editingNote by remember { mutableStateOf<LessonNoteUi?>(null) }
+    var deletingNote by remember { mutableStateOf<LessonNoteUi?>(null) }
 
     val acad = activeTerm?.let { term ->
         val start = kotlinx.datetime.LocalDate.parse(term.startDate)
@@ -261,7 +270,9 @@ fun HomeTop(
                                             lesson = lesson,
                                             status = status,
                                             breakToNextMinutes = breakToNext,
-                                            modifier = Modifier.width(200.dp)
+                                            modifier = Modifier.width(200.dp),
+                                            onClick = { selectedLesson = lesson },
+                                            onQuickMenuClick = { quickMenuAnchor = it }
                                         )
                                     }
                                 }
@@ -280,7 +291,9 @@ fun HomeTop(
                                             lesson = lesson,
                                             status = status,
                                             breakToNextMinutes = breakToNext,
-                                            modifier = Modifier.fillMaxWidth()
+                                            modifier = Modifier.fillMaxWidth(),
+                                            onClick = { selectedLesson = lesson },
+                                            onQuickMenuClick = { quickMenuAnchor = it }
                                         )
                                     }
                                 }
@@ -290,5 +303,80 @@ fun HomeTop(
                 }
             }
         }
+    }
+
+    selectedLesson?.let { lesson ->
+        LessonDetailsDialog(
+            lesson = lesson,
+            notes = notesForLesson(lesson),
+            onDismiss = { selectedLesson = null },
+            onAddNote = {
+                selectedLesson = null
+                noteDialogLesson = lesson
+            },
+            onAddReminder = { },
+            onAddFile = { },
+            onEditNote = { note ->
+                editingNote = note
+            },
+            onDeleteNote = { note ->
+                deletingNote = note
+            }
+        )
+    }
+
+    deletingNote?.let { note ->
+        ConfirmActionDialog(
+            title = "Jegyzet törlése",
+            message = "Biztosan törölni szeretnéd ezt a jegyzetet?",
+            confirmText = "Törlés",
+            dismissText = "Mégse",
+            onConfirm = {
+                onDeleteNote(note)
+                deletingNote = null
+            },
+            onDismiss = {
+                deletingNote = null
+            }
+        )
+    }
+
+    editingNote?.let { note ->
+        EditNoteDialog(
+            note = note,
+            onDismiss = { editingNote = null },
+            onSave = { newText ->
+                onUpdateNote(note, newText)
+                editingNote = null
+            }
+        )
+    }
+
+    noteDialogLesson?.let { lesson ->
+        AddNoteDialog(
+            lesson = lesson,
+            onDismiss = { noteDialogLesson = null },
+            onSave = { text ->
+                onSaveNote(lesson, text)
+                noteDialogLesson = null
+            }
+        )
+    }
+
+    quickMenuAnchor?.let { anchor ->
+        LessonQuickMenuOverlay(
+            anchor = anchor,
+            onDismiss = { quickMenuAnchor = null },
+            onAddNote = {
+                quickMenuAnchor = null
+                noteDialogLesson = anchor.lesson
+            },
+            onAddReminder = {
+                quickMenuAnchor = null
+            },
+            onAddFile = {
+                quickMenuAnchor = null
+            }
+        )
     }
 }

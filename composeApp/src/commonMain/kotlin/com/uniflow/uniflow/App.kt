@@ -17,10 +17,15 @@ import com.uniflow.uniflow.home.AcademicTerm
 import com.uniflow.uniflow.home.HomeTop
 import com.uniflow.uniflow.home.LessonCard
 import com.uniflow.uniflow.home.LessonLayoutMode
+import com.uniflow.uniflow.home.LessonNoteUi
 import com.uniflow.uniflow.home.LessonStatus
 import com.uniflow.uniflow.home.statusFor
 import com.uniflow.uniflow.home.StudentInfo
+import com.uniflow.uniflow.home.TimetableScreen
 import com.uniflow.uniflow.home.WeekUtil.today
+import com.uniflow.uniflow.home.loadLessonsForDay
+import com.uniflow.uniflow.home.TimetableScreen
+import com.uniflow.uniflow.home.buildingNameFromRoom
 import com.uniflow.uniflow.home.currentSecondsSinceMidnight
 import com.uniflow.uniflow.settings.ThemeSettings
 import com.uniflow.uniflow.ui.settings.SettingsScreen
@@ -36,6 +41,7 @@ import kotlin.time.ExperimentalTime
 
 private enum class MainTab {
     HOME,
+    TIMETABLE,
     SETTINGS
 }
 
@@ -57,6 +63,7 @@ fun todayDisplayText(): String {
     return "${now.year}.${now.month.number.toString().padStart(2, '0')}.${now.day.toString().padStart(2, '0')}"
 }
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun App(
     databaseDriverFactory: DatabaseDriverFactory
@@ -128,7 +135,52 @@ fun App(
         selectedTab = MainTab.HOME
     }
 
+    val onSaveNote: (LessonCard, String) -> Unit = { lesson, text ->
+        val userId = loggedInUserId
+        if (userId != null && text.isNotBlank()) {
+            db.lessonNotesQueries.insertLessonNote(
+                user_id = userId,
+                lesson_id = lesson.lessonId,
+                content = text.trim(),
+                created_at = Clock.System.now().toEpochMilliseconds()
+            )
+        }
+    }
 
+    val onDeleteNote: (LessonNoteUi) -> Unit = { note ->
+        db.lessonNotesQueries.deleteLessonNote(id = note.id)
+    }
+
+    val onUpdateNote: (LessonNoteUi, String) -> Unit = { note, newText ->
+        if (newText.isNotBlank()) {
+            db.lessonNotesQueries.updateLessonNote(
+                content = newText.trim(),
+                created_at = Clock.System.now().toEpochMilliseconds(),
+                id = note.id
+            )
+        }
+    }
+
+    val notesForLesson: (LessonCard) -> List<LessonNoteUi> = { lesson ->
+        val userId = loggedInUserId
+        if (userId == null) {
+            emptyList()
+        } else {
+            db.lessonNotesQueries
+                .getNotesForLesson(
+                    user_id = userId,
+                    lesson_id = lesson.lessonId
+                )
+                .executeAsList()
+                .map {
+                    LessonNoteUi(
+                        id = it.id,
+                        content = it.content,
+                        createdAt = it.created_at
+                    )
+                }
+        }
+    }
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -161,6 +213,12 @@ fun App(
                                 icon = {}
                             )
                             NavigationBarItem(
+                                selected = selectedTab == MainTab.TIMETABLE,
+                                onClick = { selectedTab = MainTab.TIMETABLE },
+                                label = { Text("Órarend") },
+                                icon = {}
+                            )
+                            NavigationBarItem(
                                 selected = selectedTab == MainTab.SETTINGS,
                                 onClick = { selectedTab = MainTab.SETTINGS },
                                 label = { Text("Beállítások") },
@@ -172,7 +230,7 @@ fun App(
                     when (selectedTab) {
                         MainTab.HOME -> {
                             val upcomingLessons = if (loggedInUserId != null && activeTerm != null) {
-                                loadTodayLessons(
+                                loadLessonsForDay(
                                     db = db,
                                     userId = loggedInUserId!!,
                                     termId = activeTerm.id,
@@ -198,9 +256,9 @@ fun App(
                                 location = currentLesson?.room ?: "-",
                                 building = buildingNameFromRoom(currentLesson?.room),
                                 dateText = todayDisplayText(),
-                                teacher = currentLesson?.teacher?.removePrefix("Tanár: ") ?: "-",
+                                teacher = currentLesson?.teacher ?: "-",
                                 nextRoom = nextLesson?.room ?: "-",
-                                nextTeacher = nextLesson?.teacher?.removePrefix("Tanár: ") ?: "-",
+                                nextTeacher = nextLesson?.teacher ?: "-",
                                 nextBuilding = buildingNameFromRoom(nextLesson?.room),
                                 upcoming = upcomingLessons,
                                 nowTime = nowSec,
@@ -210,7 +268,27 @@ fun App(
                                 activeTerm = activeTerm,
                                 availableTerms = availableTerms,
                                 activeTermId = activeTermId,
-                                onTermSelected = { activeTermId = it }
+                                onTermSelected = { activeTermId = it },
+                                onSaveNote = onSaveNote,
+                                notesForLesson = notesForLesson,
+                                onDeleteNote = onDeleteNote,
+                                onUpdateNote = onUpdateNote
+                            )
+                        }
+
+                        MainTab.TIMETABLE -> {
+                            TimetableScreen(
+                                modifier = Modifier.padding(innerPadding),
+                                db = db,
+                                userId = loggedInUserId,
+                                activeTerm = activeTerm,
+                                availableTerms = availableTerms,
+                                activeTermId = activeTermId,
+                                onTermSelected = { activeTermId = it },
+                                onSaveNote = onSaveNote,
+                                notesForLesson = notesForLesson,
+                                onDeleteNote = onDeleteNote,
+                                onUpdateNote = onUpdateNote
                             )
                         }
 
@@ -230,65 +308,5 @@ fun App(
                 }
             }
         }
-    }
-}
-
-private fun loadTodayLessons(
-    db: com.uniflow.database.UniFlowDatabase,
-    userId: Long,
-    termId: Long,
-    dayOfWeek: Long
-): List<LessonCard> {
-    return db.lessonsQueries
-        .getUserLessonsForDay(
-            user_id = userId,
-            term_id = termId,
-            day_of_week = dayOfWeek
-        )
-        .executeAsList()
-        .map { lesson ->
-            val course = db.coursesQueries
-                .getAllCourses()
-                .executeAsList()
-                .firstOrNull { it.id == lesson.course_id }
-
-            val roomName = lesson.room_id?.let { roomId ->
-                db.roomsQueries.getRoomById(roomId).executeAsOneOrNull()?.name
-            } ?: "-"
-
-            val teacherName = lesson.teacher_id?.let { teacherId ->
-                db.teachersQueries.getTeacherById(teacherId).executeAsOneOrNull()?.name
-            } ?: "-"
-
-            LessonCard(
-                code = course?.code?.substringAfter("/") ?: "N/A",
-                time = "${lesson.start_time}-${lesson.end_time}",
-                room = roomName,
-                teacher = "Tanár: $teacherName",
-                lessonType = lesson.lesson_type,
-                groupCode = lesson.group_code
-            )
-        }
-        .distinctBy {
-            "${it.code}|${it.time}|${it.room}|${it.teacher}|${it.lessonType}|${it.groupCode}"
-        }
-}
-
-private fun buildingNameFromRoom(room: String?): String {
-    if (room.isNullOrBlank()) return "-"
-
-    val normalized = room.trim().uppercase()
-
-    return when {
-        normalized == "FITN" -> "Tornaterem"
-
-        normalized.startsWith("DP") -> "Tiszti pav."
-        normalized.startsWith("INFO") -> "Tiszti pav."
-        normalized.startsWith("INF") -> "Tiszti pav."
-
-        normalized.startsWith("K") -> "Konferencia "
-        normalized.startsWith("G") -> "GIK épület"
-
-        else -> "-"
     }
 }

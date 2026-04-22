@@ -1,0 +1,25 @@
+CREATE TABLE lesson_notes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+
+insertLessonNote:
+INSERT INTO lesson_notes(user_id, lesson_id, content, created_at)
+VALUES (?, ?, ?, ?);
+
+getNotesForLesson:
+SELECT * FROM lesson_notes
+WHERE user_id = ? AND lesson_id = ?
+ORDER BY created_at DESC;
+
+deleteLessonNote:
+DELETE FROM lesson_notes
+WHERE id = ?;
+
+updateLessonNote:
+UPDATE lesson_notes
+SET content = ?, created_at = ?
+WHERE id = ?;
