@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -32,32 +34,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.uniflow.uniflow.ui.theme.UniFlowGlassCard
 import com.uniflow.uniflow.ui.theme.UniFlowTheme
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 
 @Composable
 fun LessonDetailsDialog(
     lesson: LessonCard,
     notes: List<LessonNoteUi>,
+    reminders: List<LessonReminderUi>,
     onDismiss: () -> Unit,
     onAddNote: () -> Unit,
     onAddReminder: () -> Unit,
     onAddFile: () -> Unit,
     onEditNote: (LessonNoteUi) -> Unit,
-    onDeleteNote: (LessonNoteUi) -> Unit
+    onOpenReminder: (LessonReminderUi) -> Unit,
+    onEditReminder: (LessonReminderUi) -> Unit,
+    onDeleteNote: (LessonNoteUi) -> Unit,
+    onDeleteReminder: (LessonReminderUi) -> Unit
 ) {
     var quickMenuExpanded by remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = onDismiss) {
-        Box(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            UniFlowGlassCard(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            UniFlowGlassCard(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth()) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -70,9 +68,7 @@ fun LessonDetailsDialog(
                             verticalAlignment = Alignment.Top,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Column(
-                                modifier = Modifier.weight(1f)
-                            ) {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = lesson.code,
                                     style = MaterialTheme.typography.headlineSmall,
@@ -109,11 +105,7 @@ fun LessonDetailsDialog(
 
                         if (!lesson.note.isNullOrBlank()) {
                             Spacer(Modifier.height(12.dp))
-
-                            ExpandableSection(
-                                title = "Órai megjegyzés",
-                                initiallyExpanded = true
-                            ) {
+                            ExpandableSection(title = "Órai megjegyzés", initiallyExpanded = true) {
                                 Text(
                                     text = lesson.note,
                                     style = MaterialTheme.typography.bodyMedium,
@@ -122,16 +114,26 @@ fun LessonDetailsDialog(
                             }
                         }
 
+                        if (reminders.isNotEmpty()) {
+                            Spacer(Modifier.height(12.dp))
+                            ExpandableSection(title = "Emlékeztetők", initiallyExpanded = true) {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    reminders.forEach { reminder ->
+                                        LessonReminderItem(
+                                            reminder = reminder,
+                                            onOpen = { onOpenReminder(reminder) },
+                                            onEdit = { onEditReminder(reminder) },
+                                            onDelete = { onDeleteReminder(reminder) }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
                         if (notes.isNotEmpty()) {
                             Spacer(Modifier.height(12.dp))
-
-                            ExpandableSection(
-                                title = "Jegyzetek",
-                                initiallyExpanded = true
-                            ) {
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
+                            ExpandableSection(title = "Jegyzetek", initiallyExpanded = true) {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     notes.forEach { note ->
                                         LessonNoteItem(
                                             note = note,
@@ -175,9 +177,7 @@ fun LessonDetailsDialog(
                         color = UniFlowTheme.colors.accent.copy(alpha = 0.18f),
                         border = BorderStroke(1.dp, UniFlowTheme.colors.glassBorder)
                     ) {
-                        Box(
-                            contentAlignment = Alignment.Center
-                        ) {
+                        Box(contentAlignment = Alignment.Center) {
                             Icon(
                                 imageVector = Icons.Filled.Add,
                                 contentDescription = "Gyors hozzáadás",
@@ -192,13 +192,8 @@ fun LessonDetailsDialog(
 }
 
 @Composable
-private fun DetailRow(
-    label: String,
-    value: String
-) {
-    Column(
-        modifier = Modifier.padding(vertical = 6.dp)
-    ) {
+private fun DetailRow(label: String, value: String) {
+    Column(modifier = Modifier.padding(vertical = 6.dp)) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,

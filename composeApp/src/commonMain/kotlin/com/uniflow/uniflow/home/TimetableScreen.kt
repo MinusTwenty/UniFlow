@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,7 +48,12 @@ fun TimetableScreen(
     onSaveNote: (LessonCard, String) -> Unit,
     notesForLesson: (LessonCard) -> List<LessonNoteUi>,
     onDeleteNote: (LessonNoteUi) -> Unit,
-    onUpdateNote: (LessonNoteUi, String) -> Unit
+    onUpdateNote: (LessonNoteUi, String) -> Unit,
+    onSaveReminder: (LessonCard, String, String, ReminderType, Long) -> Unit,
+    onUpdateReminder: (LessonReminderUi, String, String, ReminderType, Long) -> Unit,
+    remindersForLesson: (LessonCard) -> List<LessonReminderUi>,
+    onDeleteReminder: (LessonReminderUi) -> Unit,
+    onToggleReminderCompleted: (LessonReminderUi) -> Unit,
 ) {
     var viewMode by remember { mutableStateOf(TimetableViewMode.WEEKLY) }
     var selectedDay by remember { mutableStateOf(1L) }
@@ -56,6 +62,10 @@ fun TimetableScreen(
     var noteDialogLesson by remember { mutableStateOf<LessonCard?>(null) }
     var editingNote by remember { mutableStateOf<LessonNoteUi?>(null) }
     var deletingNote by remember { mutableStateOf<LessonNoteUi?>(null) }
+    var reminderDialogLesson by remember { mutableStateOf<LessonCard?>(null) }
+    var selectedReminder by remember { mutableStateOf<LessonReminderUi?>(null) }
+    var editingReminder by remember { mutableStateOf<LessonReminderUi?>(null) }
+    var deletingReminder by remember { mutableStateOf<LessonReminderUi?>(null) }
 
     val weeklyColumns = remember(userId, activeTermId) {
         val weekdays = listOf(
@@ -173,18 +183,29 @@ fun TimetableScreen(
         LessonDetailsDialog(
             lesson = lesson,
             notes = notesForLesson(lesson),
+            reminders = remindersForLesson(lesson),
             onDismiss = { selectedLesson = null },
             onAddNote = {
-                selectedLesson = null
                 noteDialogLesson = lesson
             },
-            onAddReminder = { },
+            onAddReminder = {
+                reminderDialogLesson = lesson
+            },
             onAddFile = { },
             onEditNote = { note ->
                 editingNote = note
             },
+            onOpenReminder = { reminder ->
+                selectedReminder = reminder
+            },
+            onEditReminder = { reminder ->
+                editingReminder = reminder
+            },
             onDeleteNote = { note ->
                 deletingNote = note
+            },
+            onDeleteReminder = { reminder ->
+                deletingReminder = reminder
             }
         )
     }
@@ -227,6 +248,68 @@ fun TimetableScreen(
         )
     }
 
+    reminderDialogLesson?.let { lesson ->
+        AddReminderDialog(
+            lesson = lesson,
+            onDismiss = { reminderDialogLesson = null },
+            onSave = { title, description, type, triggerAt ->
+                onSaveReminder(lesson, title, description, type, triggerAt)
+                reminderDialogLesson = null
+            }
+        )
+    }
+
+    selectedReminder?.let { reminder ->
+        ReminderDetailsDialog(
+            reminder = reminder,
+            onDismiss = { selectedReminder = null },
+            onEdit = {
+                editingReminder = reminder
+                selectedReminder = null
+            },
+            onToggleCompleted = {
+                onToggleReminderCompleted(reminder)
+                selectedReminder = null
+            },
+            onDelete = {
+                deletingReminder = reminder
+                selectedReminder = null
+            }
+        )
+    }
+
+    editingReminder?.let { reminder ->
+        selectedLesson?.let { lesson ->
+            AddReminderDialog(
+                lesson = lesson,
+                onDismiss = { editingReminder = null },
+                initialReminder = reminder,
+                dialogTitle = "Emlékeztető szerkesztése",
+                confirmText = "Mentés",
+                onSave = { title, description, type, triggerAt ->
+                    onUpdateReminder(reminder, title, description, type, triggerAt)
+                    editingReminder = null
+                }
+            )
+        }
+    }
+
+    deletingReminder?.let { reminder ->
+        ConfirmActionDialog(
+            title = "Emlékeztető törlése",
+            message = "Biztosan törölni szeretnéd ezt az emlékeztetőt?",
+            confirmText = "Törlés",
+            dismissText = "Mégse",
+            onConfirm = {
+                onDeleteReminder(reminder)
+                deletingReminder = null
+            },
+            onDismiss = {
+                deletingReminder = null
+            }
+        )
+    }
+
     quickMenuAnchor?.let { anchor ->
         LessonQuickMenuOverlay(
             anchor = anchor,
@@ -237,6 +320,7 @@ fun TimetableScreen(
             },
             onAddReminder = {
                 quickMenuAnchor = null
+                reminderDialogLesson = anchor.lesson
             },
             onAddFile = {
                 quickMenuAnchor = null
@@ -244,7 +328,6 @@ fun TimetableScreen(
         )
     }
 }
-
 
 @Composable
 private fun TimetableDayCard(
@@ -353,7 +436,7 @@ private fun DayButton(
 ) {
     val shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)
 
-    androidx.compose.foundation.layout.Box(
+    Box(
         modifier = Modifier
             .background(
                 color = if (selected) MaterialTheme.colorScheme.primary

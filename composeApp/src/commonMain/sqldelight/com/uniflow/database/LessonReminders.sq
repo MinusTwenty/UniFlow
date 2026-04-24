@@ -1,0 +1,54 @@
+CREATE TABLE lesson_reminders (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  reminder_type TEXT NOT NULL DEFAULT 'GENERAL'
+    CHECK (reminder_type IN ('GENERAL', 'EXAM', 'ASSIGNMENT', 'LESSON')),
+  trigger_at INTEGER NOT NULL,
+  is_enabled INTEGER NOT NULL DEFAULT 1,
+  created_at INTEGER NOT NULL
+);
+
+insertLessonReminder:
+INSERT INTO lesson_reminders(
+  user_id,
+  lesson_id,
+  title,
+  description,
+  reminder_type,
+  trigger_at,
+  is_enabled,
+  created_at
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+getRemindersForLesson:
+SELECT * FROM lesson_reminders
+WHERE user_id = ? AND lesson_id = ?
+ORDER BY trigger_at ASC;
+
+getAllRemindersForUser:
+SELECT * FROM lesson_reminders
+WHERE user_id = ?
+ORDER BY trigger_at ASC;
+
+deleteLessonReminder:
+DELETE FROM lesson_reminders
+WHERE id = ?;
+
+updateLessonReminder:
+UPDATE lesson_reminders
+SET
+  title = ?,
+  description = ?,
+  reminder_type = ?,
+  trigger_at = ?,
+  is_enabled = ?
+WHERE id = ?;
+
+setReminderEnabled:
+UPDATE lesson_reminders
+SET is_enabled = ?
+WHERE id = ?;

@@ -1,25 +1,34 @@
 package com.uniflow.uniflow.home
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.statusBarsPadding
 import com.uniflow.uniflow.ui.theme.GlassChip
 import com.uniflow.uniflow.ui.theme.UniFlowGlassCard
 import com.uniflow.uniflow.ui.theme.UniFlowTheme
-import kotlinx.coroutines.delay
 import kotlinx.datetime.LocalDate
 
 @Composable
@@ -45,9 +54,13 @@ fun HomeTop(
     onSaveNote: (LessonCard, String) -> Unit,
     notesForLesson: (LessonCard) -> List<LessonNoteUi>,
     onDeleteNote: (LessonNoteUi) -> Unit,
-    onUpdateNote: (LessonNoteUi, String) -> Unit
+    onUpdateNote: (LessonNoteUi, String) -> Unit,
+    onSaveReminder: (LessonCard, String, String, ReminderType, Long) -> Unit,
+    onUpdateReminder: (LessonReminderUi, String, String, ReminderType, Long) -> Unit,
+    remindersForLesson: (LessonCard) -> List<LessonReminderUi>,
+    onDeleteReminder: (LessonReminderUi) -> Unit,
+    onToggleReminderCompleted: (LessonReminderUi) -> Unit
 ) {
-    // --- Week calculations ---
     val today = WeekUtil.today()
     val iso = WeekUtil.isoWeekInfo(today)
     val parity = WeekUtil.isoWeekParity(today)
@@ -56,10 +69,14 @@ fun HomeTop(
     var noteDialogLesson by remember { mutableStateOf<LessonCard?>(null) }
     var editingNote by remember { mutableStateOf<LessonNoteUi?>(null) }
     var deletingNote by remember { mutableStateOf<LessonNoteUi?>(null) }
+    var reminderDialogLesson by remember { mutableStateOf<LessonCard?>(null) }
+    var selectedReminder by remember { mutableStateOf<LessonReminderUi?>(null) }
+    var editingReminder by remember { mutableStateOf<LessonReminderUi?>(null) }
+    var deletingReminder by remember { mutableStateOf<LessonReminderUi?>(null) }
 
     val acad = activeTerm?.let { term ->
-        val start = kotlinx.datetime.LocalDate.parse(term.startDate)
-        val end = kotlinx.datetime.LocalDate.parse(term.endDate)
+        val start = LocalDate.parse(term.startDate)
+        val end = LocalDate.parse(term.endDate)
 
         WeekUtil.academicWeek(
             date = today,
@@ -70,16 +87,13 @@ fun HomeTop(
 
     val nowSec = nowTime
 
-
-
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .statusBarsPadding()
             .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 96.dp)
     ) {
-        // Hallgató
         SectionCard(title = "Hallgató") {
             Row(
                 modifier = Modifier
@@ -106,7 +120,6 @@ fun HomeTop(
                 LangChip("HU")
             }
 
-            // Hetek
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -124,7 +137,6 @@ fun HomeTop(
 
         Spacer(Modifier.height(12.dp))
 
-        //Óra adatok
         UniFlowGlassCard(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -145,7 +157,7 @@ fun HomeTop(
                     Column(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ){
+                    ) {
                         Text("Épület: $building", color = UniFlowTheme.colors.textPrimary)
                         Text("Hely: $location", color = UniFlowTheme.colors.textPrimary)
                         Text("Tanár: $teacher", color = UniFlowTheme.colors.textPrimary)
@@ -185,7 +197,6 @@ fun HomeTop(
 
         Spacer(Modifier.height(12.dp))
 
-        //Szünet
         run {
             val breakRemaining = findBreakRemainingSeconds(nowSec, upcoming)
             val activeRemaining = findActiveLessonRemainingSeconds(nowSec, upcoming)
@@ -215,7 +226,6 @@ fun HomeTop(
                 }
             }
 
-            // Következő órák
             UniFlowGlassCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -245,9 +255,11 @@ fun HomeTop(
                     val activeIndex = statuses.indexOfFirst { it.second == LessonStatus.ACTIVE }
                     val nextIndex = statuses.indexOfFirst { it.second == LessonStatus.UPCOMING }
                     val breakMinutes =
-                        if (activeIndex >= 0 && nextIndex == activeIndex + 1)
+                        if (activeIndex >= 0 && nextIndex == activeIndex + 1) {
                             breakBetween(upcoming[activeIndex], upcoming[nextIndex])
-                        else null
+                        } else {
+                            null
+                        }
 
                     if (upcoming.isEmpty()) {
                         Text(
@@ -309,18 +321,29 @@ fun HomeTop(
         LessonDetailsDialog(
             lesson = lesson,
             notes = notesForLesson(lesson),
+            reminders = remindersForLesson(lesson),
             onDismiss = { selectedLesson = null },
             onAddNote = {
-                selectedLesson = null
                 noteDialogLesson = lesson
             },
-            onAddReminder = { },
+            onAddReminder = {
+                reminderDialogLesson = lesson
+            },
             onAddFile = { },
             onEditNote = { note ->
                 editingNote = note
             },
+            onOpenReminder = { reminder ->
+                selectedReminder = reminder
+            },
+            onEditReminder = { reminder ->
+                editingReminder = reminder
+            },
             onDeleteNote = { note ->
                 deletingNote = note
+            },
+            onDeleteReminder = { reminder ->
+                deletingReminder = reminder
             }
         )
     }
@@ -363,6 +386,68 @@ fun HomeTop(
         )
     }
 
+    reminderDialogLesson?.let { lesson ->
+        AddReminderDialog(
+            lesson = lesson,
+            onDismiss = { reminderDialogLesson = null },
+            onSave = { title, description, type, triggerAt ->
+                onSaveReminder(lesson, title, description, type, triggerAt)
+                reminderDialogLesson = null
+            }
+        )
+    }
+
+    selectedReminder?.let { reminder ->
+        ReminderDetailsDialog(
+            reminder = reminder,
+            onDismiss = { selectedReminder = null },
+            onEdit = {
+                editingReminder = reminder
+                selectedReminder = null
+            },
+            onToggleCompleted = {
+                onToggleReminderCompleted(reminder)
+                selectedReminder = null
+            },
+            onDelete = {
+                deletingReminder = reminder
+                selectedReminder = null
+            }
+        )
+    }
+
+    editingReminder?.let { reminder ->
+        selectedLesson?.let { lesson ->
+            AddReminderDialog(
+                lesson = lesson,
+                onDismiss = { editingReminder = null },
+                initialReminder = reminder,
+                dialogTitle = "Emlékeztető szerkesztése",
+                confirmText = "Mentés",
+                onSave = { title, description, type, triggerAt ->
+                    onUpdateReminder(reminder, title, description, type, triggerAt)
+                    editingReminder = null
+                }
+            )
+        }
+    }
+
+    deletingReminder?.let { reminder ->
+        ConfirmActionDialog(
+            title = "Emlékeztető törlése",
+            message = "Biztosan törölni szeretnéd ezt az emlékeztetőt?",
+            confirmText = "Törlés",
+            dismissText = "Mégse",
+            onConfirm = {
+                onDeleteReminder(reminder)
+                deletingReminder = null
+            },
+            onDismiss = {
+                deletingReminder = null
+            }
+        )
+    }
+
     quickMenuAnchor?.let { anchor ->
         LessonQuickMenuOverlay(
             anchor = anchor,
@@ -373,6 +458,7 @@ fun HomeTop(
             },
             onAddReminder = {
                 quickMenuAnchor = null
+                reminderDialogLesson = anchor.lesson
             },
             onAddFile = {
                 quickMenuAnchor = null
