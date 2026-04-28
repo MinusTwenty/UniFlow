@@ -46,5 +46,18 @@ WHERE e.user_id = ?
   AND l.day_of_week = ?
 ORDER BY l.start_time;
 
+getUserLessonsForTerm:
+SELECT l.*
+FROM lessons l
+JOIN enrollments e ON e.course_id = l.course_id AND e.term_id = l.term_id
+WHERE e.user_id = ?
+  AND l.term_id = ?
+ORDER BY l.day_of_week, l.start_time;
+
+getLessonById:
+SELECT *
+FROM lessons
+WHERE id = ?;
+
 deleteAllLessons:
 DELETE FROM lessons;

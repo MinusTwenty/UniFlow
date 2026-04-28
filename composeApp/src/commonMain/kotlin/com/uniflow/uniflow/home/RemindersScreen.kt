@@ -98,6 +98,7 @@ fun RemindersScreen(
         AddReminderDialog(
             lesson = LessonCard(
                 lessonId = 0L,
+                dayOfWeek = 0L,
                 code = "Emlékeztető",
                 title = "Szerkesztés",
                 time = "",
@@ -108,7 +109,9 @@ fun RemindersScreen(
                 note = null,
                 groupCode = "",
                 credits = 0L,
-                weekType = ""
+                weekType = "",
+                validFrom = "",
+                validTo = ""
             ),
             onDismiss = { editingReminder = null },
             initialReminder = reminder,

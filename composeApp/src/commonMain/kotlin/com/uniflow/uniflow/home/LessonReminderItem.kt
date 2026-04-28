@@ -93,6 +93,15 @@ fun LessonReminderItem(
                     color = UniFlowTheme.colors.textSecondary.copy(alpha = contentAlpha)
                 )
 
+                reminder.lessonCode?.let { lessonCode ->
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = lessonCode,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = UniFlowTheme.colors.textSecondary.copy(alpha = contentAlpha)
+                    )
+                }
+
                 if (!reminder.isEnabled) {
                     Spacer(Modifier.height(6.dp))
                     Text(

@@ -70,6 +70,7 @@ fun HomeTop(
     var editingNote by remember { mutableStateOf<LessonNoteUi?>(null) }
     var deletingNote by remember { mutableStateOf<LessonNoteUi?>(null) }
     var reminderDialogLesson by remember { mutableStateOf<LessonCard?>(null) }
+    var fileDialogLesson by remember { mutableStateOf<LessonCard?>(null) }
     var selectedReminder by remember { mutableStateOf<LessonReminderUi?>(null) }
     var editingReminder by remember { mutableStateOf<LessonReminderUi?>(null) }
     var deletingReminder by remember { mutableStateOf<LessonReminderUi?>(null) }
@@ -158,6 +159,12 @@ fun HomeTop(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
+                        Text(
+                            text = "Aktuális óra",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold
+                        )
                         Text("Épület: $building", color = UniFlowTheme.colors.textPrimary)
                         Text("Hely: $location", color = UniFlowTheme.colors.textPrimary)
                         Text("Tanár: $teacher", color = UniFlowTheme.colors.textPrimary)
@@ -169,9 +176,15 @@ fun HomeTop(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Text("Köv. épület: $nextBuilding", color = UniFlowTheme.colors.textPrimary)
-                        Text("Köv. hely: $nextRoom", color = UniFlowTheme.colors.textPrimary)
-                        Text("Köv. tanár: $nextTeacher", color = UniFlowTheme.colors.textPrimary)
+                        Text(
+                            text = "Következő óra",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text("Épület: $nextBuilding", color = UniFlowTheme.colors.textPrimary)
+                        Text("Hely: $nextRoom", color = UniFlowTheme.colors.textPrimary)
+                        Text("Tanár: $nextTeacher", color = UniFlowTheme.colors.textPrimary)
                     }
                 }
             }
@@ -322,6 +335,7 @@ fun HomeTop(
             lesson = lesson,
             notes = notesForLesson(lesson),
             reminders = remindersForLesson(lesson),
+            attachments = LessonAttachmentManager.listForLesson(lesson),
             onDismiss = { selectedLesson = null },
             onAddNote = {
                 noteDialogLesson = lesson
@@ -329,7 +343,12 @@ fun HomeTop(
             onAddReminder = {
                 reminderDialogLesson = lesson
             },
-            onAddFile = { },
+            onAddFile = {
+                fileDialogLesson = lesson
+            },
+            onOpenFile = { file ->
+                LessonAttachmentManager.openImportedFile(file)
+            },
             onEditNote = { note ->
                 editingNote = note
             },
@@ -394,6 +413,13 @@ fun HomeTop(
                 onSaveReminder(lesson, title, description, type, triggerAt)
                 reminderDialogLesson = null
             }
+        )
+    }
+
+    fileDialogLesson?.let { lesson ->
+        FileAttachmentDialog(
+            lesson = lesson,
+            onDismiss = { fileDialogLesson = null }
         )
     }
 
@@ -462,6 +488,7 @@ fun HomeTop(
             },
             onAddFile = {
                 quickMenuAnchor = null
+                fileDialogLesson = anchor.lesson
             }
         )
     }

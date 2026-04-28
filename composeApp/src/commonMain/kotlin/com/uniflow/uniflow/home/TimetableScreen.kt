@@ -63,6 +63,7 @@ fun TimetableScreen(
     var editingNote by remember { mutableStateOf<LessonNoteUi?>(null) }
     var deletingNote by remember { mutableStateOf<LessonNoteUi?>(null) }
     var reminderDialogLesson by remember { mutableStateOf<LessonCard?>(null) }
+    var fileDialogLesson by remember { mutableStateOf<LessonCard?>(null) }
     var selectedReminder by remember { mutableStateOf<LessonReminderUi?>(null) }
     var editingReminder by remember { mutableStateOf<LessonReminderUi?>(null) }
     var deletingReminder by remember { mutableStateOf<LessonReminderUi?>(null) }
@@ -184,6 +185,7 @@ fun TimetableScreen(
             lesson = lesson,
             notes = notesForLesson(lesson),
             reminders = remindersForLesson(lesson),
+            attachments = LessonAttachmentManager.listForLesson(lesson),
             onDismiss = { selectedLesson = null },
             onAddNote = {
                 noteDialogLesson = lesson
@@ -191,7 +193,12 @@ fun TimetableScreen(
             onAddReminder = {
                 reminderDialogLesson = lesson
             },
-            onAddFile = { },
+            onAddFile = {
+                fileDialogLesson = lesson
+            },
+            onOpenFile = { file ->
+                LessonAttachmentManager.openImportedFile(file)
+            },
             onEditNote = { note ->
                 editingNote = note
             },
@@ -256,6 +263,13 @@ fun TimetableScreen(
                 onSaveReminder(lesson, title, description, type, triggerAt)
                 reminderDialogLesson = null
             }
+        )
+    }
+
+    fileDialogLesson?.let { lesson ->
+        FileAttachmentDialog(
+            lesson = lesson,
+            onDismiss = { fileDialogLesson = null }
         )
     }
 
@@ -324,6 +338,7 @@ fun TimetableScreen(
             },
             onAddFile = {
                 quickMenuAnchor = null
+                fileDialogLesson = anchor.lesson
             }
         )
     }

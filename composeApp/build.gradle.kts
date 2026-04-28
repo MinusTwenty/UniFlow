@@ -46,6 +46,7 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation("app.cash.sqldelight:android-driver:2.2.1")
+            implementation("com.google.android.gms:play-services-auth:21.4.0")
         }
 
         iosMain.dependencies {
@@ -111,4 +112,3 @@ sqldelight {
         }
     }
 }
-

@@ -40,10 +40,12 @@ fun LessonDetailsDialog(
     lesson: LessonCard,
     notes: List<LessonNoteUi>,
     reminders: List<LessonReminderUi>,
+    attachments: List<ImportedLessonFile>,
     onDismiss: () -> Unit,
     onAddNote: () -> Unit,
     onAddReminder: () -> Unit,
     onAddFile: () -> Unit,
+    onOpenFile: (ImportedLessonFile) -> Unit,
     onEditNote: (LessonNoteUi) -> Unit,
     onOpenReminder: (LessonReminderUi) -> Unit,
     onEditReminder: (LessonReminderUi) -> Unit,
@@ -105,7 +107,7 @@ fun LessonDetailsDialog(
 
                         if (!lesson.note.isNullOrBlank()) {
                             Spacer(Modifier.height(12.dp))
-                            ExpandableSection(title = "Órai megjegyzés", initiallyExpanded = true) {
+                            ExpandableSection(title = "Órarendi megjegyzés", initiallyExpanded = true) {
                                 Text(
                                     text = lesson.note,
                                     style = MaterialTheme.typography.bodyMedium,
@@ -140,6 +142,20 @@ fun LessonDetailsDialog(
                                             createdAtLabel = formatNoteCreatedAt(note.createdAt),
                                             onEdit = { onEditNote(note) },
                                             onDelete = { onDeleteNote(note) }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        if (attachments.isNotEmpty()) {
+                            Spacer(Modifier.height(12.dp))
+                            ExpandableSection(title = "Csatolt fájlok", initiallyExpanded = true) {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    attachments.forEach { file ->
+                                        AttachmentItem(
+                                            file = file,
+                                            onOpen = { onOpenFile(file) }
                                         )
                                     }
                                 }
@@ -188,6 +204,43 @@ fun LessonDetailsDialog(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun AttachmentItem(
+    file: ImportedLessonFile,
+    onOpen: () -> Unit
+) {
+    UniFlowGlassCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
+            .clickable(onClick = onOpen)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Text(
+                text = file.displayName,
+                style = MaterialTheme.typography.bodyLarge,
+                color = UniFlowTheme.colors.textPrimary
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = formatAttachmentSize(file.byteSize),
+                style = MaterialTheme.typography.bodySmall,
+                color = UniFlowTheme.colors.textSecondary
+            )
+        }
+    }
+}
+
+private fun formatAttachmentSize(byteSize: Long): String {
+    return when {
+        byteSize >= 1024 * 1024 -> "${byteSize / (1024 * 1024)} MB"
+        byteSize >= 1024 -> "${byteSize / 1024} KB"
+        else -> "$byteSize B"
     }
 }
 

@@ -1,5 +1,6 @@
 package com.uniflow.uniflow
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -26,6 +28,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -42,6 +45,7 @@ fun LoginScreenWithValidation(
 ) {
     val scope = rememberCoroutineScope()
     val colors = UniFlowTheme.colors
+    val focusManager = LocalFocusManager.current
 
     var identifier by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -52,6 +56,11 @@ fun LoginScreenWithValidation(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures {
+                    focusManager.clearFocus()
+                }
+            }
             .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

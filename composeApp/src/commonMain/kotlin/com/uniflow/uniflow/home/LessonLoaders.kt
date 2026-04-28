@@ -31,6 +31,7 @@ fun loadLessonsForDay(
 
             LessonCard(
                 lessonId = lesson.id,
+                dayOfWeek = lesson.day_of_week,
                 code = course?.code?.substringAfter("/") ?: "N/A",
                 title = course?.name ?: "Ismeretlen tantárgy",
                 time = "${lesson.start_time}-${lesson.end_time}",
@@ -41,7 +42,9 @@ fun loadLessonsForDay(
                 groupCode = lesson.group_code,
                 credits = course?.credits ?: 0L,
                 weekType = lesson.week_type,
-                note = lesson.note
+                note = lesson.note,
+                validFrom = lesson.valid_from,
+                validTo = lesson.valid_to
             )
         }
         .distinctBy {

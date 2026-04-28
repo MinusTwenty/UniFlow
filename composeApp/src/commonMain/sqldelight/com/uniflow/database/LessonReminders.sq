@@ -24,6 +24,9 @@ INSERT INTO lesson_reminders(
 )
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
+lastInsertedReminderId:
+SELECT last_insert_rowid();
+
 getRemindersForLesson:
 SELECT * FROM lesson_reminders
 WHERE user_id = ? AND lesson_id = ?

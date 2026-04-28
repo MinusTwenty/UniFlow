@@ -140,6 +140,11 @@ fun ReminderDetailsDialog(
                     DetailField("Leírás", reminder.description)
                 }
 
+                reminder.lessonCode?.let { lessonCode ->
+                    Spacer(Modifier.height(14.dp))
+                    DetailField("Kapcsolódó óra", lessonCode)
+                }
+
                 Spacer(Modifier.height(14.dp))
                 DetailField("Dátum", dateLabel)
                 Spacer(Modifier.height(12.dp))

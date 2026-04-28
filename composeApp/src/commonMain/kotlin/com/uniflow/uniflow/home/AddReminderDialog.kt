@@ -1,5 +1,6 @@
 package com.uniflow.uniflow.home
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,10 +40,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -81,6 +84,7 @@ fun AddReminderDialog(
     confirmText: String = "Emlékeztető mentése",
     dialogTitle: String = if (initialReminder == null) "Új emlékeztető" else "Emlékeztető szerkesztése"
 ) {
+    val focusManager = LocalFocusManager.current
     val now = remember {
         initialReminder?.let {
             Instant.fromEpochMilliseconds(it.triggerAt)
@@ -106,6 +110,11 @@ fun AddReminderDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .pointerInput(Unit) {
+                        detectTapGestures {
+                            focusManager.clearFocus()
+                        }
+                    }
                     .verticalScroll(rememberScrollState())
                     .padding(18.dp)
             ) {
@@ -242,10 +251,17 @@ fun AddReminderDialog(
 
                 Button(
                     onClick = {
-                        val triggerAt = buildReminderEpochMillis(selectedDate, selectedHour, selectedMinute)
+                        val triggerAt = buildReminderEpochMillis(
+                            selectedDate = selectedDate,
+                            selectedHour = selectedHour,
+                            selectedMinute = selectedMinute,
+                            alertOption = alertOption
+                        )
                         when {
                             title.isBlank() -> error = "A cím megadása kötelező."
                             triggerAt == null -> error = "Nem sikerült összeállítani a kiválasztott időpontot."
+                            triggerAt <= Clock.System.now().toEpochMilliseconds() ->
+                                error = "Az emlékeztetés időpontja már elmúlt."
                             else -> {
                                 error = null
                                 onSave(title.trim(), description.trim(), selectedType, triggerAt)
@@ -533,10 +549,21 @@ private fun reminderFieldColors() = OutlinedTextFieldDefaults.colors(
 )
 
 @OptIn(ExperimentalTime::class)
-private fun buildReminderEpochMillis(selectedDate: LocalDate, selectedHour: Int, selectedMinute: Int): Long? {
+private fun buildReminderEpochMillis(
+    selectedDate: LocalDate,
+    selectedHour: Int,
+    selectedMinute: Int,
+    alertOption: ReminderAlertOption
+): Long? {
     return runCatching {
         val dateTime = LocalDateTime.parse("${selectedDate}T${selectedHour.twoDigits()}:${selectedMinute.twoDigits()}:00")
-        dateTime.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+        val selectedAt = dateTime.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+        when (alertOption) {
+            ReminderAlertOption.AT_TIME -> selectedAt
+            ReminderAlertOption.ONE_HOUR -> selectedAt - 60 * 60 * 1000L
+            ReminderAlertOption.ONE_DAY -> selectedAt - 24 * 60 * 60 * 1000L
+            ReminderAlertOption.NEVER -> selectedAt
+        }
     }.getOrNull()
 }
 

@@ -1,5 +1,6 @@
 package com.uniflow.uniflow.home
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +16,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.uniflow.uniflow.ui.theme.UniFlowGlassCard
@@ -27,6 +30,7 @@ fun EditNoteDialog(
     onDismiss: () -> Unit,
     onSave: (String) -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
     var noteText by remember(note.id) { mutableStateOf(note.content) }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -36,6 +40,11 @@ fun EditNoteDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .pointerInput(Unit) {
+                        detectTapGestures {
+                            focusManager.clearFocus()
+                        }
+                    }
                     .padding(18.dp)
             ) {
                 Text(
