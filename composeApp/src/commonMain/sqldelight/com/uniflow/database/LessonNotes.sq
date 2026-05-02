@@ -7,7 +7,7 @@ CREATE TABLE lesson_notes (
 );
 
 insertLessonNote:
-INSERT INTO lesson_notes(user_id, lesson_id, content, created_at)
+INSERT OR IGNORE INTO lesson_notes(user_id, lesson_id, content, created_at)
 VALUES (?, ?, ?, ?);
 
 getNotesForLesson:

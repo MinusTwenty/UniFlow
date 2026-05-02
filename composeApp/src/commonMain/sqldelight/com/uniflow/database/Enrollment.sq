@@ -7,7 +7,7 @@ CREATE TABLE enrollments (
 );
 
 enroll:
-INSERT INTO enrollments(user_id, term_id, course_id)
+INSERT OR IGNORE INTO enrollments(user_id, term_id, course_id)
 VALUES (?, ?, ?);
 
 getEnrollmentsForUser:

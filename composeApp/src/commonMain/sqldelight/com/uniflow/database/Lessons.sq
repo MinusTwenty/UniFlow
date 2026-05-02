@@ -25,7 +25,7 @@ CREATE TABLE lessons (
 );
 
 insertLesson:
-INSERT INTO lessons(
+INSERT OR IGNORE INTO lessons(
   course_id, term_id, day_of_week, start_time, end_time,
   week_type, group_code, lesson_type,
   room_id, teacher_id, valid_from, valid_to, note

@@ -4,7 +4,7 @@ CREATE TABLE teachers (
 );
 
 insertTeacher:
-INSERT INTO teachers(name) VALUES (?);
+INSERT OR IGNORE INTO teachers(name) VALUES (?);
 
 getTeacherByName:
 SELECT * FROM teachers WHERE name = ?;

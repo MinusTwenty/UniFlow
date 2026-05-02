@@ -1,6 +1,7 @@
 package com.uniflow.uniflow
 
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -22,12 +24,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.russhwolf.settings.Settings
+import com.uniflow.database.UniFlowDatabase
 import com.uniflow.uniflow.auth.DbAuthRepository
 import com.uniflow.uniflow.data.DatabaseDriverFactory
 import com.uniflow.uniflow.data.provideDatabase
@@ -57,6 +61,10 @@ import com.uniflow.uniflow.settings.ThemeSettings
 import com.uniflow.uniflow.ui.settings.SettingsScreen
 import com.uniflow.uniflow.ui.theme.UniFlowAppTheme
 import com.uniflow.uniflow.ui.theme.UniFlowBackground
+import com.uniflow.uniflow.ui.theme.UniFlowThemeMode
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlinx.datetime.LocalDate
@@ -121,7 +129,20 @@ fun App(
     var lessonLayoutMode by rememberSaveable { mutableStateOf(LessonLayoutMode.VERTICAL) }
     var nowSec by remember { mutableStateOf(currentSecondsSinceMidnight()) }
     var today by remember { mutableStateOf(today()) }
-    val db = remember { provideDatabase(databaseDriverFactory) }
+    var dbInstance by remember { mutableStateOf<UniFlowDatabase?>(null) }
+
+    LaunchedEffect(Unit) {
+        dbInstance = withContext(Dispatchers.IO) {
+            provideDatabase(databaseDriverFactory)
+        }
+    }
+
+    if (dbInstance == null) {
+        SplashLoadingScreen(selectedTheme = selectedTheme)
+        return
+    }
+
+    val db = remember { dbInstance!! }
 
     val availableTerms = remember(loggedInUserId) {
         if (loggedInUserId == null) {
@@ -641,4 +662,18 @@ private fun TabLabel(text: String) {
         maxLines = 1,
         overflow = TextOverflow.Ellipsis
     )
+}
+
+@Composable
+private fun SplashLoadingScreen(selectedTheme: UniFlowThemeMode) {
+    UniFlowAppTheme(mode = selectedTheme) {
+        UniFlowBackground {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+    }
 }

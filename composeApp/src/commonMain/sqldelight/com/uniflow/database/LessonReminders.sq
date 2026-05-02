@@ -12,7 +12,7 @@ CREATE TABLE lesson_reminders (
 );
 
 insertLessonReminder:
-INSERT INTO lesson_reminders(
+INSERT OR IGNORE INTO lesson_reminders(
   user_id,
   lesson_id,
   title,

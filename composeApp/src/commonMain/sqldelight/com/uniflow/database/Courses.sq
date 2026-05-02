@@ -6,7 +6,7 @@ CREATE TABLE courses (
 );
 
 insertCourse:
-INSERT INTO courses(code, name, credits)
+INSERT OR IGNORE INTO courses(code, name, credits)
 VALUES (?, ?, ?);
 
 getCourseByCode:

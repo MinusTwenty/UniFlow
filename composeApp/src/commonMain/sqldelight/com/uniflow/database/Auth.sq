@@ -13,7 +13,7 @@ countUsers:
 SELECT COUNT(*) FROM users;
 
 insertUser:
-INSERT INTO users(username, password_hash, password_salt, created_at)
+INSERT OR IGNORE INTO users(username, password_hash, password_salt, created_at)
 VALUES (?, ?, ?, ?);
 
 deleteAllUsers:

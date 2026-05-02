@@ -4,7 +4,7 @@ CREATE TABLE rooms (
 );
 
 insertRoom:
-INSERT INTO rooms(name) VALUES (?);
+INSERT OR IGNORE INTO rooms(name) VALUES (?);
 
 getRoomByName:
 SELECT * FROM rooms WHERE name = ?;

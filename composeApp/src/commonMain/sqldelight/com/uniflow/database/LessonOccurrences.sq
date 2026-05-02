@@ -6,7 +6,7 @@ CREATE TABLE lesson_occurrences (
 );
 
 insertOccurrence:
-INSERT INTO lesson_occurrences(lesson_id, date)
+INSERT OR IGNORE INTO lesson_occurrences(lesson_id, date)
 VALUES (?, ?);
 
 getOccurrencesForLesson:
