@@ -49,7 +49,6 @@ fun UniFlowBackground(
             .background(base)
             .background(softGlow)
             .background(vignette)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         content()
     }

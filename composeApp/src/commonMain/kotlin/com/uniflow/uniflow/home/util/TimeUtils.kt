@@ -88,7 +88,6 @@ fun findBreakRemainingSeconds(nowSeconds: Int, lessons: List<LessonCard>): Int? 
 @OptIn(ExperimentalTime::class)
     fun currentSecondsSinceMidnight(): Int {
         val t = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time
-        println(t)
         return t.hour * 3600 + t.minute * 60 + t.second }
 
 /** Format: if >= 1 hour -> "x ó y p", else -> "x p y mp" */

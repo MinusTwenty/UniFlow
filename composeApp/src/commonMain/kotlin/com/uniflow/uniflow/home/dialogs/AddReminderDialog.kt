@@ -84,7 +84,6 @@ fun AddReminderDialog(
     confirmText: String = "Emlékeztető mentése",
     dialogTitle: String = if (initialReminder == null) "Új emlékeztető" else "Emlékeztető szerkesztése"
 ) {
-    val focusManager = LocalFocusManager.current
     val now = remember {
         initialReminder?.let {
             Instant.fromEpochMilliseconds(it.triggerAt)
@@ -106,6 +105,8 @@ fun AddReminderDialog(
     var error by remember { mutableStateOf<String?>(null) }
 
     Dialog(onDismissRequest = onDismiss) {
+        val focusManager = LocalFocusManager.current
+
         UniFlowGlassCard(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier

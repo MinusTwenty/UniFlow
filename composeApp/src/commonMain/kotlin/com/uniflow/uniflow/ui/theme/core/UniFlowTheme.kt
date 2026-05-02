@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
@@ -217,7 +218,7 @@ fun UniFlowAppTheme(
 ) {
     val bundle = themeBundle(mode)
 
-    androidx.compose.runtime.CompositionLocalProvider(
+    CompositionLocalProvider(
         LocalUniFlowExtraColors provides bundle.extra,
         LocalUniFlowSpacing provides UniFlowSpacing(),
         LocalUniFlowRadii provides UniFlowRadii()

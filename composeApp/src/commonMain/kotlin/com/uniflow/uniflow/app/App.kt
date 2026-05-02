@@ -1,6 +1,8 @@
 package com.uniflow.uniflow
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -21,6 +23,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.russhwolf.settings.Settings
@@ -114,7 +118,7 @@ fun App(
         mutableStateOf(lessonNotificationSettings.getSavedLeadTime())
     }
     var selectedTab by rememberSaveable { mutableStateOf(MainTab.HOME) }
-    var lessonLayoutMode by rememberSaveable { mutableStateOf(LessonLayoutMode.HORIZONTAL) }
+    var lessonLayoutMode by rememberSaveable { mutableStateOf(LessonLayoutMode.VERTICAL) }
     var nowSec by remember { mutableStateOf(currentSecondsSinceMidnight()) }
     var today by remember { mutableStateOf(today()) }
     val db = remember { provideDatabase(databaseDriverFactory) }
@@ -467,6 +471,7 @@ fun App(
         LessonNotificationScheduler.scheduleAll(schedules)
     }
 
+    val focusManager = LocalFocusManager.current
     UniFlowAppTheme(mode = selectedTheme) {
         UniFlowBackground {
             if (!isLoggedIn) {
@@ -479,7 +484,11 @@ fun App(
                 )
             } else {
                 BoxWithConstraints(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+                        detectTapGestures {
+                            focusManager.clearFocus()
+                        }
+                    }
                 ) {
                     val compactTabLabels = maxWidth <= 390.dp
 
@@ -487,7 +496,9 @@ fun App(
                         modifier = Modifier.fillMaxSize(),
                         containerColor = androidx.compose.ui.graphics.Color.Transparent,
                         bottomBar = {
-                            NavigationBar {
+                            NavigationBar(
+                                windowInsets = WindowInsets(0, 0, 0, 0)
+                            ) {
                                 NavigationBarItem(
                                     selected = selectedTab == MainTab.HOME,
                                     onClick = { selectedTab = MainTab.HOME },

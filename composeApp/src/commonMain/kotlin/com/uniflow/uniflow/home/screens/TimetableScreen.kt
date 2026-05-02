@@ -55,7 +55,7 @@ fun TimetableScreen(
     onDeleteReminder: (LessonReminderUi) -> Unit,
     onToggleReminderCompleted: (LessonReminderUi) -> Unit,
 ) {
-    var viewMode by remember { mutableStateOf(TimetableViewMode.WEEKLY) }
+    var viewMode by remember { mutableStateOf(TimetableViewMode.DAILY) }
     var selectedDay by remember { mutableStateOf(1L) }
     var selectedLesson by remember { mutableStateOf<LessonCard?>(null) }
     var quickMenuAnchor by remember { mutableStateOf<QuickMenuAnchor?>(null) }
@@ -143,7 +143,7 @@ fun TimetableScreen(
 
         Spacer(Modifier.height(12.dp))
 
-        SectionCard(title = "Nézet") {
+        SectionCard(title = "Nézet", modifier = Modifier.fillMaxWidth()) {
             TimetableViewToggle(
                 selected = viewMode,
                 onChange = { viewMode = it }
