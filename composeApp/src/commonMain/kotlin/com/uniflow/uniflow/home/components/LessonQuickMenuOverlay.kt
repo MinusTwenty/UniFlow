@@ -21,18 +21,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.uniflow.uniflow.ui.theme.UniFlowGlassCard
 import com.uniflow.uniflow.ui.theme.UniFlowTheme
@@ -46,17 +46,19 @@ fun LessonQuickMenuOverlay(
     onAddReminder: () -> Unit,
     onAddFile: () -> Unit
 ) {
-    var popupWidthPx by remember { mutableIntStateOf(0) }
-    var popupHeightPx by remember { mutableIntStateOf(0) }
-
-    val popupOffset = calculatePopupOffset(
-        bounds = anchor.bounds,
-        popupWidthPx = popupWidthPx,
-        popupHeightPx = popupHeightPx
-    )
+    val density = LocalDensity.current
+    val gapPx = remember(density) {
+        (anchor.bounds.height * 1.5).roundToInt()
+    }
+    val popupPositionProvider = remember(anchor.bounds, gapPx) {
+        QuickMenuPopupPositionProvider(
+            bounds = anchor.bounds,
+            gapPx = gapPx
+        )
+    }
 
     Popup(
-        offset = popupOffset,
+        popupPositionProvider = popupPositionProvider,
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true)
     ) {
@@ -71,12 +73,7 @@ fun LessonQuickMenuOverlay(
                 animationSpec = tween(120)
             )
         ) {
-            UniFlowGlassCard(
-                modifier = Modifier.onGloballyPositioned { coordinates ->
-                    popupWidthPx = coordinates.size.width
-                    popupHeightPx = coordinates.size.height
-                }
-            ) {
+            UniFlowGlassCard {
                 Column(
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
@@ -122,20 +119,24 @@ fun LessonQuickMenuOverlay(
     }
 }
 
-private fun calculatePopupOffset(
-    bounds: Rect,
-    popupWidthPx: Int,
-    popupHeightPx: Int
-): IntOffset {
-    val gap = 16
+private class QuickMenuPopupPositionProvider(
+    private val bounds: Rect,
+    private val gapPx: Int
+) : PopupPositionProvider {
+    override fun calculatePosition(
+        anchorBounds: IntRect,
+        windowSize: IntSize,
+        layoutDirection: androidx.compose.ui.unit.LayoutDirection,
+        popupContentSize: IntSize
+    ): IntOffset {
+        val desiredX = bounds.right.roundToInt() - popupContentSize.width
+        val desiredY = bounds.top.roundToInt() - popupContentSize.height - gapPx
 
-    val width = if (popupWidthPx > 0) popupWidthPx else 170
-    val height = if (popupHeightPx > 0) popupHeightPx else 120
+        val clampedX = desiredX.coerceIn(0, (windowSize.width - popupContentSize.width).coerceAtLeast(0))
+        val clampedY = desiredY.coerceIn(0, (windowSize.height - popupContentSize.height).coerceAtLeast(0))
 
-    val x = (bounds.right - width).roundToInt()
-    val y = (bounds.top - height - gap).roundToInt()
-
-    return IntOffset(x, y)
+        return IntOffset(clampedX, clampedY)
+    }
 }
 
 @Composable
