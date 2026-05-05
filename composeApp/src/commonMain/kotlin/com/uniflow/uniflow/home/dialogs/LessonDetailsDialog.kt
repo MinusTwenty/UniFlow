@@ -98,8 +98,8 @@ fun LessonDetailsDialog(
                         Spacer(Modifier.height(12.dp))
 
                         DetailRow("Idő", lesson.time)
-                        DetailRow("Oktatás módja", lesson.lessonType)
-                        DetailRow("Rendszeresség", lesson.weekType)
+                        DetailRow("Oktatás módja", lessonTypeLabel(lesson.lessonType))
+                        DetailRow("Rendszeresség", weekTypeLabel(lesson.weekType))
                         DetailRow("Helyiség", lesson.room)
                         DetailRow("Épület", lesson.building)
                         DetailRow("Oktató", lesson.teacher)
@@ -260,5 +260,24 @@ private fun DetailRow(label: String, value: String) {
             style = MaterialTheme.typography.bodyLarge,
             color = UniFlowTheme.colors.textPrimary
         )
+    }
+}
+
+private fun lessonTypeLabel(lessonType: String): String {
+    return when (lessonType.uppercase()) {
+        "LECTURE" -> "Előadás"
+        "PRACTICE" -> "Gyakorlat"
+        "SEMINAR" -> "Szeminárium"
+        "SPORT" -> "Sport"
+        else -> lessonType.ifBlank { "-" }
+    }
+}
+
+private fun weekTypeLabel(weekType: String): String {
+    return when (weekType.uppercase()) {
+        "EVERY" -> "Hetente"
+        "ODD" -> "Páratlan hét"
+        "EVEN" -> "Páros hét"
+        else -> weekType.ifBlank { "-" }
     }
 }

@@ -11,27 +11,20 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.daysUntil
 import kotlin.time.ExperimentalTime
 
-/**
- * Static week utilities (ISO week, week-year, academic week, parity).
- * Pure functions, no globals.
- */
 object WeekUtil {
 
-    // --- Public API ---
-
-    /** Today's ISO week number and week-year based on the local timezone. */
     fun currentIsoWeekInfo(tz: TimeZone = TimeZone.currentSystemDefault()): IsoWeekInfo {
         val today = today(tz)
         return isoWeekInfo(today)
     }
 
-    /** ISO week and week-year for any date. */
+
     fun isoWeekInfo(date: LocalDate): IsoWeekInfo {
         val dow = isoDow(date.dayOfWeek)
-        val thursday = date.plus(DatePeriod(days = 4 - dow))          // Thursday determines the week-year
+        val thursday = date.plus(DatePeriod(days = 4 - dow))
         val weekYear = thursday.year
 
-        val jan4 = LocalDate(weekYear, 1, 4)                          // Week 1 always contains Jan 4 (ISO)
+        val jan4 = LocalDate(weekYear, 1, 4)
         val week1Monday = jan4.minus(DatePeriod(days = isoDow(jan4.dayOfWeek) - 1))
 
         val thisMonday = date.minus(DatePeriod(days = dow - 1))
@@ -41,10 +34,7 @@ object WeekUtil {
         return IsoWeekInfo(week = week, weekYear = weekYear)
     }
 
-    /**
-     * Academic week = 1 + full weeks elapsed since semesterStart.
-     * Returns null if date < semesterStart, or if semesterEnd != null and date > semesterEnd.
-     */
+
     fun academicWeek(
         date: LocalDate,
         semesterStart: LocalDate,
@@ -53,14 +43,13 @@ object WeekUtil {
         if (date < semesterStart) return null
         if (semesterEnd != null && date > semesterEnd) return null
 
-        // Align to Mondays for an “academic week” that starts on Monday.
         val startMonday = semesterStart.minus(DatePeriod(days = isoDow(semesterStart.dayOfWeek) - 1))
         val dateMonday = date.minus(DatePeriod(days = isoDow(date.dayOfWeek) - 1))
         val weeks = startMonday.daysUntil(dateMonday) / 7
-        return weeks + 1 // 1-based
+        return weeks + 1
     }
 
-    /** Even/odd ISO week parity for a date. */
+
     fun isoWeekParity(date: LocalDate): WeekParity =
         if (isoWeekInfo(date).week % 2 == 0) WeekParity.Even else WeekParity.Odd
 
