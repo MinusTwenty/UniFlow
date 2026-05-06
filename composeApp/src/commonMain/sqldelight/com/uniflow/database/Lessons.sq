@@ -4,9 +4,9 @@ CREATE TABLE lessons (
   course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
   term_id INTEGER NOT NULL REFERENCES terms(id) ON DELETE CASCADE,
 
-  day_of_week INTEGER NOT NULL,     -- 1=Mon ... 7=Sun
-  start_time TEXT NOT NULL,         -- HH:MM
-  end_time TEXT NOT NULL,           -- HH:MM
+  day_of_week INTEGER NOT NULL,
+  start_time TEXT NOT NULL,
+  end_time TEXT NOT NULL,
 
   week_type TEXT NOT NULL DEFAULT 'EVERY'
     CHECK (week_type IN ('EVERY','ODD','EVEN')),
@@ -18,8 +18,8 @@ CREATE TABLE lessons (
   room_id INTEGER REFERENCES rooms(id),
   teacher_id INTEGER REFERENCES teachers(id),
 
-  valid_from TEXT NOT NULL, -- YYYY-MM-DD
-  valid_to TEXT NOT NULL,   -- YYYY-MM-DD
+  valid_from TEXT NOT NULL,
+  valid_to TEXT NOT NULL,
 
   note TEXT
 );
@@ -36,7 +36,6 @@ SELECT * FROM lessons
 WHERE course_id = ? AND term_id = ?
 ORDER BY day_of_week, start_time;
 
--- User órarend egy napra (enrollment alapján szűr)
 getUserLessonsForDay:
 SELECT l.*
 FROM lessons l

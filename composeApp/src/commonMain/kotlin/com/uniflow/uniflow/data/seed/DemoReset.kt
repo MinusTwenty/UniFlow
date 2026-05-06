@@ -4,7 +4,6 @@ import com.uniflow.database.UniFlowDatabase
 
 fun resetAndReseedDemoData(db: UniFlowDatabase) {
     db.transaction {
-        // Fontos: törlési sorrend a kapcsolatok miatt
         db.lessonOccurrencesQueries.deleteAllLessonOccurrences()
         db.enrollmentQueries.deleteAllEnrollments()
         db.lessonsQueries.deleteAllLessons()

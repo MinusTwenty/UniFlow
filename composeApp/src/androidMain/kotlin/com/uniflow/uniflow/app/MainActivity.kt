@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             App(
                 databaseDriverFactory = DatabaseDriverFactory(this)
-            )   // <- root composable that handles Login -> HomeTop
+            )
         }
     }
 }

@@ -53,12 +53,10 @@ object WeekUtil {
     fun isoWeekParity(date: LocalDate): WeekParity =
         if (isoWeekInfo(date).week % 2 == 0) WeekParity.Even else WeekParity.Odd
 
-    /** Convenience: get today's LocalDate in a timezone. */
     @OptIn(ExperimentalTime::class)
     fun today(tz: TimeZone = TimeZone.currentSystemDefault()): LocalDate =
         Clock.System.now().toLocalDateTime(tz).date
 
-    // --- Helpers ---
 
     data class IsoWeekInfo(val week: Int, val weekYear: Int)
     enum class WeekParity { Even, Odd }

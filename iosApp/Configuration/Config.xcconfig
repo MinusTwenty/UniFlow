@@ -1,4 +1,3 @@
-// Leave TEAM_ID empty by default so the project opens on any machine.
 TEAM_ID =
 
 PRODUCT_NAME = uniflow

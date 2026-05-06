@@ -66,8 +66,6 @@ fun seedUser1FirstSemester(db: UniFlowDatabase) {
     val tex = ensureCourse("AIdb/TEX", "Tipográfiai rendszerek és programozásuk", 0)
 
     fun enroll(courseId: Long) {
-        // ha már van, a UNIQUE miatt hibázhat -> ezért előbb próbálunk “létezést” ellenőrizni:
-        // egyszerű megoldás: INSERT és try/catch, vagy külön query. Most try/catch.
         try {
             db.enrollmentQueries.enroll(user1.id, term.id, courseId)
         } catch (_: Throwable) {
@@ -299,7 +297,7 @@ fun seedUser1FirstSemester(db: UniFlowDatabase) {
         null
     )
 
-    // PR1 pénteki gyakorlat: csak bizonyos dátumokon (occurrences)
+    // PR1 pénteki gyakorlat csak bizonyos dátumokon (occurrences)
     db.lessonsQueries.insertLesson(
         pr1.id,
         term.id,
@@ -316,7 +314,6 @@ fun seedUser1FirstSemester(db: UniFlowDatabase) {
         "Csak adott dátumokon (lesson_occurrences)."
     )
 
-    // Keressük vissza a létrehozott lesson-t (a legutóbbi beszúrás lesson_id-ját egyszerűen így fogjuk megoldani: lekérjük a PR1 pénteki 14:00 órát)
     val pr1FridayLessons = db.lessonsQueries.getLessonsForCourseTerm(pr1.id, term.id).executeAsList()
         .filter { it.day_of_week == 5L && it.start_time == "14:00" && it.end_time == "17:54" }
 
